@@ -35,7 +35,7 @@
 | LLM | OpenAI (`gpt-4o` default, `o3` optional) | User has premium key; `browser-use` supports `ChatOpenAI` natively |
 | CLI | `typer` + `rich` | Clean CLI with pretty output |
 | Config/profile | YAML + Markdown resume (PDF also supported) | Human-editable, AI-friendly; Markdown is preferred because it parses cleanly without extraction libraries |
-| Storage | SQLite via `sqlite-utils` | Zero-setup application log |
+| Storage | SQLite via `sqlalchemy` (ORM) | Zero-setup application log; declarative ORM models with full type safety |
 | Env management | `python-dotenv` | Standard `.env` pattern |
 | Type checking | `mypy` (strict) | Catches bugs at development time; all public APIs are fully annotated |
 
@@ -85,7 +85,7 @@ dependencies = [
     "pyyaml",
     "pypdf2",          # only needed for PDF resume fallback
     "python-dotenv",
-    "sqlite-utils",
+    "sqlalchemy>=2.0",
 ]
 
 [tool.uv.dev-dependencies]
@@ -303,21 +303,43 @@ async def run_application(
 ### `logger.py`
 
 Responsibilities:
-- Create and manage `applications.db` SQLite database
+- Create and manage `applications.db` SQLite database using SQLAlchemy 2.0 ORM
 - Insert a record after each run (success or failure)
 - Support listing past applications
 
-Schema:
-```sql
-CREATE TABLE applications (
-    id INTEGER PRIMARY KEY,
-    url TEXT NOT NULL,
-    job_title TEXT,
-    company TEXT,
-    status TEXT,           -- 'submitted' | 'dry_run' | 'failed' | 'abandoned'
-    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT             -- agent's final_result summary
-);
+ORM model (SQLAlchemy 2.0 declarative style):
+```python
+from __future__ import annotations
+import datetime
+from typing import Optional
+from sqlalchemy import create_engine, String, Text
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
+
+class Base(DeclarativeBase):
+    pass
+
+class Application(Base):
+    __tablename__ = "applications"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    url: Mapped[str] = mapped_column(String, nullable=False)
+    job_title: Mapped[Optional[str]]
+    company: Mapped[Optional[str]]
+    status: Mapped[Optional[str]]        # 'submitted' | 'dry_run' | 'failed' | 'abandoned'
+    applied_at: Mapped[datetime.datetime] = mapped_column(
+        default=datetime.datetime.utcnow
+    )
+    notes: Mapped[Optional[str]] = mapped_column(Text)  # agent's final_result summary
+```
+
+Engine and session setup:
+```python
+engine = create_engine(f"sqlite:///{db_path}", echo=False)
+Base.metadata.create_all(engine)
+
+with Session(engine) as session:
+    session.add(Application(url=url, status="submitted", ...))
+    session.commit()
 ```
 
 ### `main.py`
