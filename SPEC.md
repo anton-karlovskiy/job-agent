@@ -150,6 +150,7 @@ education:
 preferences:
   cover_letter_tone: professional   # professional | casual | enthusiastic
   cover_letter_length: medium       # short | medium | long
+  writing_style: natural-human      # natural-human (default) | formal
 ```
 
 ---
@@ -227,6 +228,7 @@ Responsibilities:
 - Build the task prompt string sent to `browser-use` Agent
 - Incorporate profile context, job URL, and any instructions
 - Prompt structure: role + objective + profile data + step-by-step instructions + uncertainty rule
+- Inject writing-style constraints (no em-dashes, no AI buzzwords, varied sentence rhythm) so generated text passes human review
 
 Key function:
 ```python
@@ -321,8 +323,8 @@ INSTRUCTIONS:
 1. Navigate to the job application URL.
 2. Scroll through the entire form first to understand its structure.
 3. Fill out every field — do not skip optional fields.
-4. If a field is not explicitly covered by the profile, generate the best possible answer using the job description, company context visible on the page, and the applicant's background. Do NOT call `ask_human` for open-ended essay questions, motivation questions, or ambiguous options — make a confident, tailored choice.
-5. For cover letter fields: write a tailored cover letter using the profile and any job description text visible on the page. Tone: {cover_letter_tone}.
+4. If a field is not explicitly covered by the profile, generate the best possible answer using the job description, company context visible on the page, and the applicant's background. Do NOT call `ask_human` for open-ended essay questions, motivation questions, or ambiguous options — make a confident, tailored choice. Write in natural, varied prose. Avoid em-dashes, AI-associated buzzwords ("leverage", "spearhead", "delve", "I am thrilled to"), and bullet-heavy structure. Vary sentence length. Contractions are fine where the tone allows.
+5. For cover letter fields: write a tailored cover letter using the profile and any job description text visible on the page. Tone: {cover_letter_tone}. Use prose paragraphs, not bullets. Avoid em-dashes and overused opener phrases. Every sentence should sound like it was typed by the applicant, not generated.
 6. For file upload fields: use the `upload_resume` tool.
 7. Before clicking submit: call the `confirm_submit` tool to show the user a full summary of all filled fields (including AI-generated answers) so they can review and confirm. [omit if --yes flag]
 8. Call `ask_human` only when you hit a hard blocker you cannot bypass: a CAPTCHA, an unexpected login wall, an MFA prompt, or a required field with no inferable answer (e.g. an internal employee ID). Describe exactly what you encountered and what the user needs to do.
@@ -362,6 +364,37 @@ Press Enter when done: █
 ```
 
 The user resolves the blocker in the browser and presses Enter; the agent resumes from where it stopped.
+
+---
+
+## Text generation style
+
+AI-generated text is increasingly recognised and rejected by application reviewers. The agent must write all free-text content so that it reads as naturally composed by the applicant.
+
+### Rules the agent must follow
+
+**Avoid these AI-writing markers:**
+- Em-dashes (—): use a comma, semicolon, or restructure the sentence instead
+- Overused AI vocabulary: "leverage", "spearhead", "synergy", "passionate about", "I am excited to", "I am thrilled to", "delve", "it is worth noting"
+- Bullet-heavy cover letters: prose paragraphs read more human
+- Unnaturally uniform sentence length: vary short and long sentences
+- Starting consecutive sentences with the same word or structure
+
+**Aim for:**
+- Concrete, specific sentences ("I reduced deploy time from 45 min to 8 min by migrating to GitHub Actions") over vague claims ("I improved processes")
+- Occasional contractions where the tone allows ("I've", "I'd", "wasn't")
+- Natural paragraph transitions without signpost phrases like "Furthermore," or "In conclusion,"
+- First-person voice that sounds like one person wrote it, not a template
+
+### Where this applies
+
+All free-text the agent fills autonomously:
+- Cover letter fields
+- "Why do you want to work here?" and similar motivation questions
+- Competency / behavioural questions ("Describe a challenge you overcame")
+- Any other open-ended text box
+
+The `writing_style: natural-human` profile preference (default) enforces these rules. Setting it to `formal` relaxes them for industries where structured prose is conventional (law, finance, academia).
 
 ---
 
