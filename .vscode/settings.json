@@ -1,0 +1,10 @@
+{
+    "cSpell.words": [
+        "asyncio",
+        "dataclass",
+        "docstrings",
+        "mypy",
+        "pypdf",
+        "typer"
+    ]
+}
