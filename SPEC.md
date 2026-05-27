@@ -234,7 +234,7 @@ def build_task_prompt(profile: ProfileContext, job_url: str, dry_run: bool) -> s
 ```
 
 The prompt must include an explicit instruction like:
-> "If you encounter a question you cannot answer confidently using the provided profile, call the `ask_human` tool with the question text and wait for the user's response before continuing."
+> "Generate a best-effort answer for any field not covered by the profile — do not pause to ask the user for open-ended questions or ambiguous options. Call the `ask_human` tool only for hard blockers you cannot resolve yourself: CAPTCHAs, login walls, MFA prompts, or required fields with no inferable answer."
 
 ### `tools.py`
 
@@ -242,9 +242,9 @@ Custom `browser-use` tool actions registered on the `Tools()` object:
 
 | Tool name | Description |
 |---|---|
-| `ask_human` | Pauses agent, prints question to terminal, waits for user input, returns the answer to the agent |
+| `ask_human` | Pauses agent for hard blockers the AI cannot resolve (CAPTCHAs, login walls, MFA); prints a message describing what the user must do and waits for confirmation before continuing |
 | `upload_resume` | Handles resume file upload to detected file input elements |
-| `confirm_submit` | Prints a summary and asks user to confirm before the agent clicks submit (unless `--yes` flag is set) |
+| `confirm_submit` | Prints a summary (including all AI-generated answers) and asks user to confirm before the agent clicks submit (unless `--yes` flag is set) |
 
 ```python
 from browser_use import Tools
@@ -252,9 +252,9 @@ from rich.prompt import Prompt
 
 tools = Tools()
 
-@tools.action(description="Ask the human user a question when you cannot answer it from the provided profile.")
-def ask_human(question: str) -> str:
-    return Prompt.ask(f"[yellow]Agent needs your input[/yellow]\n{question}")
+@tools.action(description="Interrupt the user only for hard blockers you cannot bypass yourself: CAPTCHAs, login walls, MFA prompts, or required fields with no inferable answer. Do NOT call this for open-ended questions or missing profile fields — generate a best answer instead.")
+def ask_human(message: str) -> str:
+    return Prompt.ask(f"[yellow]Agent needs your input[/yellow]\n{message}")
 ```
 
 ### `agent.py`
@@ -320,12 +320,13 @@ RESUME TEXT:
 INSTRUCTIONS:
 1. Navigate to the job application URL.
 2. Scroll through the entire form first to understand its structure.
-3. Fill out every field — do not skip optional fields. Make a reasonable best guess if information is not in the profile.
-4. If you encounter a question you cannot answer confidently from the profile above, call the `ask_human` tool with the exact question and wait for the answer before proceeding.
+3. Fill out every field — do not skip optional fields.
+4. If a field is not explicitly covered by the profile, generate the best possible answer using the job description, company context visible on the page, and the applicant's background. Do NOT call `ask_human` for open-ended essay questions, motivation questions, or ambiguous options — make a confident, tailored choice.
 5. For cover letter fields: write a tailored cover letter using the profile and any job description text visible on the page. Tone: {cover_letter_tone}.
 6. For file upload fields: use the `upload_resume` tool.
-7. Before clicking submit: call the `confirm_submit` tool to show the user a summary and get confirmation. [omit if --yes flag]
-8. After successful submission, use the `done` action with a human-readable summary of all fields filled and any questions encountered.
+7. Before clicking submit: call the `confirm_submit` tool to show the user a full summary of all filled fields (including AI-generated answers) so they can review and confirm. [omit if --yes flag]
+8. Call `ask_human` only when you hit a hard blocker you cannot bypass: a CAPTCHA, an unexpected login wall, an MFA prompt, or a required field with no inferable answer (e.g. an internal employee ID). Describe exactly what you encountered and what the user needs to do.
+9. After successful submission, use the `done` action with a human-readable summary of all fields filled and any blockers encountered.
 
 {"DO NOT click the submit button — this is a dry run." if dry_run else ""}
 ```
@@ -334,20 +335,33 @@ INSTRUCTIONS:
 
 ## Human-in-the-loop flow
 
-The agent calls `ask_human` when:
-- It encounters a field not covered by the profile (e.g. "Why do you want to work here specifically?")
-- It needs to choose between ambiguous options (e.g. salary expectations not set)
-- It detects a CAPTCHA or unexpected blocker
+### AI-generated answers (no interruption)
+
+For any field the profile does not explicitly cover, the agent generates the best possible answer autonomously:
+
+- **Open-ended / motivational questions** (e.g. "Why do you want to work here?", "Describe a challenge you overcame") — agent writes a tailored response using the job description, visible company context, and the applicant's background.
+- **Ambiguous options** (e.g. salary range, start date) — agent makes a reasonable choice informed by the job posting and profile defaults.
+
+All AI-generated answers are surfaced in the pre-submission review (`confirm_submit`) so the user can read through everything and edit in the browser before confirming.
+
+### `ask_human` — reserved for hard blockers only
+
+The agent calls `ask_human` only when it hits something it cannot bypass:
+
+- A **CAPTCHA** or bot-detection challenge
+- An unexpected **login wall** or **MFA prompt**
+- A required field with **no inferable answer** (e.g. an internal employee ID, a referral code)
 
 The terminal pauses and shows:
 ```
-╭─ Agent needs your input ─────────────────────────────╮
-│ Why do you want to work at Acme Corp specifically?   │
-╰──────────────────────────────────────────────────────╯
-Your answer: █
+╭─ Agent needs your input ─────────────────────────────────────────╮
+│ I encountered a CAPTCHA on the application page. Please solve it │
+│ in the browser window, then press Enter to continue.             │
+╰──────────────────────────────────────────────────────────────────╯
+Press Enter when done: █
 ```
 
-The user's answer is returned to the agent which incorporates it and continues.
+The user resolves the blocker in the browser and presses Enter; the agent resumes from where it stopped.
 
 ---
 
@@ -368,7 +382,7 @@ After each run, `job-agent log` displays:
 | Scenario | Behaviour |
 |---|---|
 | Resume PDF not found | Exit with clear error before starting browser |
-| Profile YAML missing required fields | Warn but continue; agent will ask_human for missing fields |
+| Profile YAML missing required fields | Warn but continue; agent generates best-effort answers from context |
 | Browser-use agent times out | Log as 'failed', print last agent step for debugging |
 | Network error mid-form | Agent retries up to 3 times, then calls ask_human |
 | CAPTCHA detected | Agent calls ask_human: "I encountered a CAPTCHA. Please solve it and press Enter." |
