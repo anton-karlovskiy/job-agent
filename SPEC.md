@@ -34,7 +34,7 @@
 | Browser automation | `browser-use` | AI-native agent loop built on Playwright |
 | LLM | OpenAI (`gpt-4o` default, `o3` optional) | User has premium key; `browser-use` supports `ChatOpenAI` natively |
 | CLI | `typer` + `rich` | Clean CLI with pretty output |
-| Config/profile | YAML + PDF resume | Human-editable, easy to version |
+| Config/profile | YAML + Markdown resume (PDF also supported) | Human-editable, AI-friendly; Markdown is preferred because it parses cleanly without extraction libraries |
 | Storage | SQLite via `sqlite-utils` | Zero-setup application log |
 | Env management | `python-dotenv` | Standard `.env` pattern |
 | Type checking | `mypy` (strict) | Catches bugs at development time; all public APIs are fully annotated |
@@ -52,7 +52,7 @@ job-agent/
 ├── README.md
 ├── SPEC.md
 ├── profile/
-│   ├── resume.pdf            # User's resume (PDF)
+│   ├── resume.md             # User's resume (Markdown preferred; .pdf also accepted)
 │   └── profile.yaml          # Structured personal/professional info
 ├── src/
 │   └── job_agent/
@@ -83,7 +83,7 @@ dependencies = [
     "typer[all]",
     "rich",
     "pyyaml",
-    "pypdf2",
+    "pypdf2",          # only needed for PDF resume fallback
     "python-dotenv",
     "sqlite-utils",
 ]
@@ -194,7 +194,7 @@ job-agent apply <url> [options]
 
 Options:
   --profile PATH     Path to profile.yaml (default: ./profile/profile.yaml)
-  --resume PATH      Path to resume PDF (default: ./profile/resume.pdf)
+  --resume PATH      Path to resume file — .md (preferred) or .pdf (default: ./profile/resume.md)
   --model TEXT       OpenAI model override (default: from .env)
   --headless         Run browser in headless mode
   --dry-run          Fill the form but do not submit
@@ -230,13 +230,16 @@ job-agent profile check
 
 Responsibilities:
 - Load and validate `profile.yaml`
-- Extract text from `resume.pdf` using `pypdf2`
+- Load the resume: read `.md` directly as plain text; extract text from `.pdf` using `pypdf2` as a fallback
 - Return a merged context string + structured dict used in prompts
 
 Key function:
 ```python
 def load_profile(profile_path: str, resume_path: str) -> ProfileContext:
-    """Returns a ProfileContext with .yaml_data (dict) and .resume_text (str)"""
+    """Returns a ProfileContext with .yaml_data (dict) and .resume_text (str).
+    
+    resume_path may point to a .md file (preferred) or a .pdf file.
+    """
 ```
 
 ### `prompt.py`
@@ -431,7 +434,7 @@ After each run, `job-agent log` displays:
 
 | Scenario | Behaviour |
 |---|---|
-| Resume PDF not found | Exit with clear error before starting browser |
+| Resume file not found | Exit with clear error before starting browser; note that `.md` is preferred over `.pdf` |
 | Profile YAML missing required fields | Warn but continue; agent generates best-effort answers from context |
 | Browser-use agent times out | Log as 'failed', print last agent step for debugging |
 | Network error mid-form | Agent retries up to 3 times, then calls ask_human |
@@ -475,4 +478,5 @@ After each run, `job-agent log` displays:
 - Keep prompts in `prompt.py`, not scattered in `agent.py`
 - The `profile/` directory should be in `.gitignore` (contains personal data)
 - Test with `--dry-run` first on any real job URL before enabling submission
+- Default resume format is **Markdown** (`.md`); use `pypdf2` only when the provided file has a `.pdf` extension
 - All source files must pass `uv run mypy src/` with `strict = true`; annotate every function signature and use `from __future__ import annotations` at the top of each module
