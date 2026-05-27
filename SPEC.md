@@ -37,6 +37,7 @@
 | Config/profile | YAML + PDF resume | Human-editable, easy to version |
 | Storage | SQLite via `sqlite-utils` | Zero-setup application log |
 | Env management | `python-dotenv` | Standard `.env` pattern |
+| Type checking | `mypy` (strict) | Catches bugs at development time; all public APIs are fully annotated |
 
 ---
 
@@ -87,6 +88,17 @@ dependencies = [
     "sqlite-utils",
 ]
 
+[tool.uv.dev-dependencies]
+dev = [
+    "mypy",
+    "types-PyYAML",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+
 [project.scripts]
 job-agent = "job_agent.main:app"
 ```
@@ -96,6 +108,11 @@ Install and run:
 uv sync
 uv run playwright install chromium
 uv run job-agent --help
+```
+
+Type-check:
+```bash
+uv run mypy src/
 ```
 
 ---
@@ -458,3 +475,4 @@ After each run, `job-agent log` displays:
 - Keep prompts in `prompt.py`, not scattered in `agent.py`
 - The `profile/` directory should be in `.gitignore` (contains personal data)
 - Test with `--dry-run` first on any real job URL before enabling submission
+- All source files must pass `uv run mypy src/` with `strict = true`; annotate every function signature and use `from __future__ import annotations` at the top of each module
