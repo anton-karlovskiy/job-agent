@@ -1,0 +1,75 @@
+# profile.example.yaml — copy to profile/profile.yaml and fill in your details
+# profile/ is .gitignore'd; this file is safe to commit.
+
+personal:
+  name: Jane Smith
+  email: jane.smith@example.com
+  phone: "+1 555 000 0000"
+  location: San Francisco, CA
+  linkedin: https://linkedin.com/in/janesmith
+  github: https://github.com/janesmith
+  website: https://janesmith.dev
+
+target:
+  roles:
+    - Software Engineer
+    - Backend Engineer
+  seniority: Senior
+  industries:
+    - fintech
+    - developer tools
+  preferred_locations:
+    - San Francisco, CA
+    - Remote
+  willing_to_relocate: false
+  work_authorization: US Citizen  # e.g. "US Citizen", "Green Card", "H-1B", "Require sponsorship"
+
+experience:
+  years_total: 7
+  current_title: Software Engineer
+  current_company: Acme Corp
+  summary: >
+    Backend-focused engineer with 7 years building distributed systems in Python and Go.
+    Led a team of 4 to deliver a payment processing service handling 10k TPS.
+
+skills:
+  languages:
+    - Python
+    - Go
+    - TypeScript
+  frameworks:
+    - FastAPI
+    - Django
+    - React
+  tools:
+    - PostgreSQL
+    - Redis
+    - Kubernetes
+    - Docker
+
+education:
+  - degree: B.S. Computer Science
+    school: University of California, Berkeley
+    year: 2018
+
+compensation:
+  desired_salary_usd: 180000
+  open_to_equity: true
+
+preferences:
+  cover_letter_tone: professional   # "professional" or "casual"
+  writing_style: natural-human      # "natural-human" or "formal"
+
+answers:
+  # Pre-baked answers for common application questions.
+  # The agent will use these verbatim when it encounters matching fields.
+  why_this_company: >
+    I'm drawn to the company's focus on developer experience and its track record
+    of shipping pragmatic solutions to hard infrastructure problems.
+  greatest_strength: >
+    I break ambiguous problems into concrete pieces quickly. When joining Acme
+    I reduced our incident response time by 40% in the first quarter just by
+    mapping the alerting gaps and patching them one by one.
+  greatest_weakness: >
+    I used to under-communicate blockers to avoid seeming stuck.
+    I've since built a habit of flagging anything unresolved for more than a day.
