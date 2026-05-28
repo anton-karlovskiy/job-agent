@@ -1,10 +1,20 @@
 {
     "cSpell.words": [
         "asyncio",
+        "Behaviour",
+        "behavioural",
         "dataclass",
         "docstrings",
+        "headful",
+        "langchain",
         "mypy",
         "pypdf",
-        "typer"
+        "pyproject",
+        "pyyaml",
+        "recognised",
+        "sqlalchemy",
+        "tablename",
+        "typer",
+        "utcnow"
     ]
 }
