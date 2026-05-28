@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 # Install dependencies and set up browser
 uv sync
-uv run playwright install chromium
+uvx browser-use install
 
 # Run the CLI
 uv run job-agent apply <url> [--dry-run] [--headless]

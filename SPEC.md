@@ -106,7 +106,7 @@ job-agent = "job_agent.main:app"
 Install and run:
 ```bash
 uv sync
-uv run playwright install chromium
+uvx browser-use install
 uv run job-agent --help
 ```
 
