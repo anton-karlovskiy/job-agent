@@ -57,7 +57,9 @@ RESUME TEXT:
 
 INSTRUCTIONS:
 1. Navigate to the job application URL.
-2. Scroll through the entire form first to understand its structure before filling anything.
+2. Scroll through the entire form first to understand its structure before filling anything. \
+Note which field types are present, in particular whether a cover letter or free-text \
+motivation textarea exists.
 3. Required fields: fill every required field without exception. If the answer is not \
 in the profile, generate the best possible answer from the job description, company context \
 visible on the page, and the applicant's background. Do NOT call `ask_human` for essay \
@@ -69,8 +71,10 @@ Generate a confident, tailored answer even when not explicitly covered by the pr
 usernames, promo codes, "How'd you hear about us?" when no clear answer exists in the profile: \
 leave blank. Do not invent values for fields that track a specific referral, internal ID, \
 or collect optional demographic data.
-6. Cover letter fields: write a full prose cover letter using the profile and any job \
-description text visible on the page. Tone: {cover_letter_tone}. Prose paragraphs, not bullets.
+6. Cover letter fields: if a cover letter or free-text motivation textarea is present on \
+the form, write a full prose cover letter using the profile and any job description text \
+visible on the page. Tone: {cover_letter_tone}. Prose paragraphs, not bullets. \
+If no such field exists on the form, skip this step entirely.
 7. For file upload fields (resume/CV): use the built-in `upload_file` action. \
 The resume path is already available in your file list — pass its path and the DOM index of the file input.
 8. Call `ask_human` ONLY for hard blockers you cannot bypass: a CAPTCHA, an unexpected login wall, \
