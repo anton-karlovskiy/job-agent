@@ -58,17 +58,23 @@ RESUME TEXT:
 INSTRUCTIONS:
 1. Navigate to the job application URL.
 2. Scroll through the entire form first to understand its structure before filling anything.
-3. Fill out every field — do not skip optional fields.
-4. If a field is not explicitly covered by the profile, generate the best possible answer \
-using the job description, company context visible on the page, and the applicant's background. \
-Do NOT call `ask_human` for open-ended essay questions, motivation questions, or ambiguous options — \
-make a confident, tailored choice. {style_rule}
-5. For cover letter fields: write a tailored cover letter using the profile and any job description \
-text visible on the page. Tone: {cover_letter_tone}. Use prose paragraphs, not bullets.
-6. For file upload fields (resume/CV): use the built-in `upload_file` action. \
+3. Required fields: fill every required field without exception. If the answer is not \
+in the profile, generate the best possible answer from the job description, company context \
+visible on the page, and the applicant's background. Do NOT call `ask_human` for essay \
+questions, motivation questions, or ambiguous options — make a confident, tailored choice. {style_rule}
+4. Substantive optional fields — cover letters, personal statements, "Why this company?", \
+motivation or essay questions: always fill these. They directly affect the hiring decision. \
+Generate a confident, tailored answer even when not explicitly covered by the profile.
+5. Low-signal optional fields — demographic questions, referral codes, internal platform \
+usernames, promo codes, "How'd you hear about us?" when no clear answer exists in the profile: \
+leave blank. Do not invent values for fields that track a specific referral, internal ID, \
+or collect optional demographic data.
+6. Cover letter fields: write a full prose cover letter using the profile and any job \
+description text visible on the page. Tone: {cover_letter_tone}. Prose paragraphs, not bullets.
+7. For file upload fields (resume/CV): use the built-in `upload_file` action. \
 The resume path is already available in your file list — pass its path and the DOM index of the file input.
-7. Call `ask_human` ONLY for hard blockers you cannot bypass: a CAPTCHA, an unexpected login wall, \
+8. Call `ask_human` ONLY for hard blockers you cannot bypass: a CAPTCHA, an unexpected login wall, \
 an MFA prompt, or a required field with absolutely no inferable answer (e.g. an internal employee ID \
 or a referral code). Describe exactly what you encountered and what the user needs to do.
-8. After completing the form (or reaching the dry-run stopping point), use the `done` action with \
+9. After completing the form (or reaching the dry-run stopping point), use the `done` action with \
 a human-readable summary of every field filled and any blockers encountered.{dry_run_line}"""
