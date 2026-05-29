@@ -58,8 +58,13 @@ async def run_application(
     try:
         history: Any = await agent.run()
         if dry_run:
-            input("\n[dry-run] Form filled. Review the browser, then press Enter to close it...")
-        return AgentResult(success=True, message=str(history))
+            try:
+                input("\n[dry-run] Form filled. Review the browser, then press Enter to close it...")
+            except EOFError:
+                pass
+        succeeded: bool = bool(history.is_successful())
+        final: str = history.final_result() or str(history)
+        return AgentResult(success=succeeded, message=final)
     except TimeoutError as exc:
         return AgentResult(success=False, message="Agent timed out.", error=str(exc))
     except Exception as exc:  # noqa: BLE001
