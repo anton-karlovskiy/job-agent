@@ -44,7 +44,7 @@ async def run_application(
     """
     task = build_task_prompt(profile=profile, job_url=job_url, dry_run=dry_run)
     llm: Any = ChatOpenAI(model=model)
-    browser: Any = Browser(headless=headless)
+    browser: Any = Browser(headless=headless, keep_alive=dry_run)
 
     agent: Any = Agent(
         task=task,
@@ -57,12 +57,15 @@ async def run_application(
 
     try:
         history: Any = await agent.run()
+        succeeded: bool = bool(history.is_successful())
         if dry_run:
             try:
-                input("\n[dry-run] Form filled. Review the browser, then press Enter to close it...")
+                if succeeded:
+                    input("\n[dry-run] Form filled. Review the browser, then press Enter to close it...")
+                else:
+                    input("\n[dry-run] Agent did not complete successfully. Review the browser, then press Enter to close it...")
             except EOFError:
                 pass
-        succeeded: bool = bool(history.is_successful())
         final: str = history.final_result() or str(history)
         return AgentResult(success=succeeded, message=final)
     except TimeoutError as exc:
