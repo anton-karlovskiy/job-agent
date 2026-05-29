@@ -30,7 +30,18 @@ async def ask_human(message: str) -> ActionResult:
     """
     console.rule("[yellow]Agent needs your input[/yellow]")
     console.print(f"[bold]{message}[/bold]")
-    answer = Prompt.ask("[dim]Your response (or press Enter when done)[/dim]")
+    try:
+        answer = Prompt.ask("[dim]Your response (or press Enter when done)[/dim]")
+    except EOFError:
+        answer = ""
+    if not answer:
+        return ActionResult(
+            extracted_content=(
+                "No human input available. Call `done` with success=False and include "
+                "this blocker in your summary so the user can review it."
+            ),
+            long_term_memory=f"Hard blocker encountered (no human available to respond): {message!r}",
+        )
     return ActionResult(
         extracted_content=f"Human responded: {answer}",
         long_term_memory=f"User was asked: {message!r}. They responded: {answer!r}",

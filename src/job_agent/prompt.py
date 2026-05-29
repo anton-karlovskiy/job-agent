@@ -71,10 +71,13 @@ Generate a confident, tailored answer even when not explicitly covered by the pr
 usernames, promo codes, "How'd you hear about us?" when no clear answer exists in the profile: \
 leave blank. Do not invent values for fields that track a specific referral, internal ID, \
 or collect optional demographic data.
-6. Cover letter fields: if a cover letter or free-text motivation textarea is present on \
-the form, write a full prose cover letter using the profile and any job description text \
-visible on the page. Tone: {cover_letter_tone}. Prose paragraphs, not bullets. \
-If no such field exists on the form, skip this step entirely.
+6. Cover letter fields: distinguish between two types: \
+(a) Free-text textarea — write a full prose cover letter using the profile and any job \
+description text visible on the page. Tone: {cover_letter_tone}. Prose paragraphs, not bullets. \
+(b) File upload input — skip it entirely; do NOT upload the resume or any other file as a \
+cover letter substitute. Only upload a cover letter if a dedicated cover letter file is \
+explicitly available in your file list (separate from the resume). \
+If no cover letter field of either type exists on the form, skip this step entirely.
 7. For file upload fields (resume/CV): use the built-in `upload_file` action. \
 The resume path is already available in your file list — pass its path and the DOM index of the file input.
 8. For dropdown / autocomplete fields (role=combobox): click the field, type to filter, \
