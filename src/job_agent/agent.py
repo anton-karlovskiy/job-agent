@@ -57,6 +57,8 @@ async def run_application(
 
     try:
         history: Any = await agent.run()
+        if dry_run:
+            input("\n[dry-run] Form filled. Review the browser, then press Enter to close it...")
         return AgentResult(success=True, message=str(history))
     except TimeoutError as exc:
         return AgentResult(success=False, message="Agent timed out.", error=str(exc))
