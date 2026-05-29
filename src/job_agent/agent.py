@@ -51,7 +51,7 @@ async def run_application(
         llm=llm,
         browser=browser,
         tools=tools,
-        custom_context={"resume_path": resume_path},
+        available_file_paths=[resume_path],
         max_failures=3,
     )
 

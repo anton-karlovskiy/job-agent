@@ -14,8 +14,14 @@ app = typer.Typer(
     name="job-agent",
     help="AI-powered job application automation.",
     add_completion=False,
+    no_args_is_help=True,
 )
 console = Console()
+
+
+@app.callback()
+def _root() -> None:
+    """AI-powered job application automation."""
 
 
 @app.command()

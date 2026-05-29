@@ -65,7 +65,8 @@ Do NOT call `ask_human` for open-ended essay questions, motivation questions, or
 make a confident, tailored choice. {style_rule}
 5. For cover letter fields: write a tailored cover letter using the profile and any job description \
 text visible on the page. Tone: {cover_letter_tone}. Use prose paragraphs, not bullets.
-6. For file upload fields: call the `upload_resume` tool.
+6. For file upload fields (resume/CV): use the built-in `upload_file` action. \
+The resume path is already available in your file list — pass its path and the DOM index of the file input.
 7. Call `ask_human` ONLY for hard blockers you cannot bypass: a CAPTCHA, an unexpected login wall, \
 an MFA prompt, or a required field with absolutely no inferable answer (e.g. an internal employee ID \
 or a referral code). Describe exactly what you encountered and what the user needs to do.
