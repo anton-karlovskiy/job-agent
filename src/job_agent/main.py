@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import os
 from pathlib import Path
 
 import typer
@@ -39,7 +38,7 @@ def apply(
         help="Path to resume (.md preferred, .pdf also accepted)",
         show_default=True,
     ),
-    model: str = typer.Option("", "--model", help="OpenAI model override (default: OPENAI_MODEL env var)"),
+    model: str = typer.Option("gpt-4o", "--model", envvar="OPENAI_MODEL", help="OpenAI model to use"),
     headless: bool = typer.Option(False, "--headless", help="Run browser in headless mode"),
     dry_run: bool = typer.Option(False, "--dry-run", help="Fill the form but do not submit"),
     yes: bool = typer.Option(False, "--yes", help="Skip the final submission confirmation prompt"),
@@ -54,11 +53,9 @@ def apply(
         console.print("[dim]Tip: .md format is preferred. Use --resume to specify an alternate path.[/dim]")
         raise typer.Exit(code=1)
 
-    effective_model = model or os.getenv("OPENAI_MODEL", "gpt-4o")
-
     console.rule("[bold]job-agent apply[/bold]")
     console.print(f"  URL    : {url}")
-    console.print(f"  Model  : {effective_model}")
+    console.print(f"  Model  : {model}")
     console.print(f"  Resume : {resume_path}")
     if dry_run:
         console.print("[yellow]  Mode   : DRY RUN — form will be filled but NOT submitted[/yellow]")
@@ -79,7 +76,7 @@ def apply(
             job_url=url,
             profile=profile,
             resume_path=str(resume_path.resolve()),
-            model=effective_model,
+            model=model,
             headless=headless,
             dry_run=dry_run,
             auto_confirm=yes,
