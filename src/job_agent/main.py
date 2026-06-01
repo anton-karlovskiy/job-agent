@@ -75,7 +75,7 @@ def apply(
         run_application(
             job_url=url,
             applicant=applicant,
-            resume_path=str(resume_path.resolve()),
+            available_file_paths=[str(resume_path.resolve())],
             model=model,
             headless=headless,
             dry_run=dry_run,

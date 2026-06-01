@@ -22,7 +22,7 @@ class AgentResult:
 async def run_application(
     job_url: str,
     applicant: ApplicantData,
-    resume_path: str,
+    available_file_paths: list[str],
     model: str,
     headless: bool,
     dry_run: bool,
@@ -33,7 +33,7 @@ async def run_application(
     Args:
         job_url: URL of the job application form.
         applicant: Loaded applicant data.
-        resume_path: Absolute path to the resume file.
+        available_file_paths: Absolute paths to files the agent may upload (e.g. resume).
         model: OpenAI model name (e.g. "gpt-4o").
         headless: Whether to run the browser in headless mode.
         dry_run: If True, fill the form but do not submit.
@@ -51,7 +51,7 @@ async def run_application(
         llm=llm,
         browser=browser,
         tools=tools,
-        available_file_paths=[resume_path],
+        available_file_paths=available_file_paths,
         max_failures=3,
     )
 
