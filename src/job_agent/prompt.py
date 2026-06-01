@@ -52,7 +52,7 @@ def build_task_prompt(applicant: ApplicantData, job_url: str, dry_run: bool) -> 
 
 APPLICANT PROFILE:
 {profile_text}
-RESUME TEXT:
+APPLICANT RESUME:
 {applicant.resume_text}
 
 INSTRUCTIONS:
