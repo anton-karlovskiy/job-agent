@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -60,16 +59,6 @@ async def run_application(
     try:
         history: Any = await agent.run()
         succeeded: bool = bool(history.is_successful())
-        if dry_run:
-            try:
-                msg = (
-                    "\n[dry-run] Form filled. Review the browser, then press Enter to close it..."
-                    if succeeded
-                    else "\n[dry-run] Agent did not complete successfully. Review the browser, then press Enter to close it..."
-                )
-                await asyncio.to_thread(input, msg)
-            except EOFError:
-                pass
         raw = history.final_result()
         final: str = raw if raw is not None else str(history)
         return AgentResult(success=succeeded, message=final)
@@ -78,4 +67,5 @@ async def run_application(
     except Exception as exc:  # noqa: BLE001
         return AgentResult(success=False, message="Agent encountered an error.", error=str(exc))
     finally:
-        await browser.kill()
+        if not dry_run:
+            await browser.kill()
