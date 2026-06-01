@@ -30,9 +30,9 @@ def build_task_prompt(applicant: ApplicantData, job_url: str, dry_run: bool) -> 
     Returns:
         A complete task prompt string.
     """
-    yaml_text = yaml.dump(applicant.yaml_data, default_flow_style=False, allow_unicode=True)
+    profile_text = yaml.dump(applicant.profile_yaml, default_flow_style=False, allow_unicode=True)
 
-    preferences: dict[str, str] = applicant.yaml_data.get("preferences", {})
+    preferences: dict[str, str] = applicant.profile_yaml.get("preferences", {})
     cover_letter_tone: str = preferences.get("cover_letter_tone", "professional")
     writing_style: str = preferences.get("writing_style", "natural-human")
 
@@ -51,7 +51,7 @@ def build_task_prompt(applicant: ApplicantData, job_url: str, dry_run: bool) -> 
     return f"""{url_line}
 
 APPLICANT PROFILE:
-{yaml_text}
+{profile_text}
 RESUME TEXT:
 {applicant.resume_text}
 

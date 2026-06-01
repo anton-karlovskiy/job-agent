@@ -44,7 +44,7 @@ main.py (typer CLI)
   → logger.py           writes SQLAlchemy Application row to applications.db
 ```
 
-**`profile.py`** returns a `ProfileContext` dataclass with `.yaml_data` (dict) and `.resume_text` (str). All other modules consume this type — it is the canonical profile representation.
+**`profile.py`** returns an `ApplicantData` dataclass with `.profile_yaml` (dict) and `.resume_text` (str). All other modules consume this type — it is the canonical profile representation.
 
 **`prompt.py`** is the single source of all prompt text. No prompt strings belong in `agent.py` or elsewhere. The prompt embeds the full profile context and explicit autonomy/style rules (no em-dashes, no AI buzzwords, autonomous answers for open-ended fields, `ask_human` only for hard blockers).
 

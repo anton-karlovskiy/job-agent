@@ -11,19 +11,19 @@ import yaml
 class ApplicantData:
     """Applicant profile and resume data consumed by all other modules."""
 
-    yaml_data: dict[str, Any]
+    profile_yaml: dict[str, Any]
     resume_text: str
 
 
 def load_applicant_data(profile_path: str, resume_path: str) -> ApplicantData:
-    """Load profile.yaml and the resume file into a ApplicantData.
+    """Load profile.yaml and the resume file into an ApplicantData instance.
 
     Args:
         profile_path: Absolute or relative path to profile.yaml.
         resume_path: Path to the resume — .md (preferred) or .pdf.
 
     Returns:
-        An ApplicantData with yaml_data and resume_text populated.
+        An ApplicantData instance with profile_yaml and resume_text populated.
 
     Raises:
         FileNotFoundError: If either file does not exist.
@@ -40,14 +40,14 @@ def load_applicant_data(profile_path: str, resume_path: str) -> ApplicantData:
 
     with profile_file.open(encoding="utf-8") as f:
         raw: Any = yaml.safe_load(f)
-    yaml_data: dict[str, Any] = raw if isinstance(raw, dict) else {}
+    profile_yaml: dict[str, Any] = raw if isinstance(raw, dict) else {}
 
     if resume_file.suffix.lower() == ".pdf":
         resume_text = _extract_pdf_text(resume_file)
     else:
         resume_text = resume_file.read_text(encoding="utf-8")
 
-    return ApplicantData(yaml_data=yaml_data, resume_text=resume_text)
+    return ApplicantData(profile_yaml=profile_yaml, resume_text=resume_text)
 
 
 def _extract_pdf_text(path: Path) -> str:
