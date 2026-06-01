@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -61,13 +62,16 @@ async def run_application(
         succeeded: bool = bool(history.is_successful())
         if dry_run:
             try:
-                if succeeded:
-                    input("\n[dry-run] Form filled. Review the browser, then press Enter to close it...")
-                else:
-                    input("\n[dry-run] Agent did not complete successfully. Review the browser, then press Enter to close it...")
+                msg = (
+                    "\n[dry-run] Form filled. Review the browser, then press Enter to close it..."
+                    if succeeded
+                    else "\n[dry-run] Agent did not complete successfully. Review the browser, then press Enter to close it..."
+                )
+                await asyncio.to_thread(input, msg)
             except EOFError:
                 pass
-        final: str = history.final_result() or str(history)
+        raw = history.final_result()
+        final: str = raw if raw is not None else str(history)
         return AgentResult(success=succeeded, message=final)
     except TimeoutError as exc:
         return AgentResult(success=False, message="Agent timed out.", error=str(exc))
