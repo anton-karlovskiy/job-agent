@@ -1,5 +1,5 @@
-# profile.example.yaml — copy to profile/profile.yaml and fill in your details
-# profile/ is .gitignore'd; this file is safe to commit.
+# profile.example.yaml — copy to applicant/profile.yaml and fill in your details
+# applicant/ is .gitignore'd; this file is safe to commit.
 
 personal:
   name: Jane Smith

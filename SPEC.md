@@ -242,7 +242,7 @@ job-agent profile check
 
 ## Core modules
 
-### `profile.py`
+### `applicant.py`
 
 Responsibilities:
 - Load and validate `profile.yaml`
