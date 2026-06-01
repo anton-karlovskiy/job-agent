@@ -39,8 +39,8 @@ def load_applicant_data(profile_path: str, resume_path: str) -> ApplicantData:
         )
 
     with profile_file.open(encoding="utf-8") as f:
-        temp_profile_yaml: Any = yaml.safe_load(f)
-    profile_yaml: dict[str, Any] = temp_profile_yaml if isinstance(temp_profile_yaml, dict) else {}
+        raw: Any = yaml.safe_load(f)
+    profile_yaml: dict[str, Any] = raw if isinstance(raw, dict) else {}
 
     if resume_file.suffix.lower() == ".pdf":
         resume_text = _extract_pdf_text(resume_file)
