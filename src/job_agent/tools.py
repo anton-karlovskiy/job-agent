@@ -20,7 +20,8 @@ tools: Tools[Any] = Tools()
     )
 )
 async def ask_human(message: str) -> ActionResult:
-    """Pause and ask the human for input when hitting a hard blocker.
+    """
+    Pause and ask the human for input when hitting a hard blocker.
 
     Args:
         message: Description of the blocker and what the user must do.
