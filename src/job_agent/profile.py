@@ -15,7 +15,7 @@ class ProfileContext:
     resume_text: str
 
 
-def load_profile(profile_path: str, resume_path: str) -> ProfileContext:
+def load_profile_context(profile_path: str, resume_path: str) -> ProfileContext:
     """Load profile.yaml and the resume file into a ProfileContext.
 
     Args:

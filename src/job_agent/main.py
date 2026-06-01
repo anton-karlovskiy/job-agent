@@ -63,10 +63,10 @@ def apply(
 
     # Import here to keep startup fast (typer --help stays snappy)
     from job_agent.agent import run_application
-    from job_agent.profile import load_profile
+    from job_agent.profile import load_profile_context
 
     try:
-        profile = load_profile(str(profile_path), str(resume_path))
+        profile = load_profile_context(str(profile_path), str(resume_path))
     except FileNotFoundError as exc:
         console.print(f"[red]{exc}[/red]")
         raise typer.Exit(code=1) from exc
