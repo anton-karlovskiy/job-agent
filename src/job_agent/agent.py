@@ -28,7 +28,8 @@ async def run_application(
     dry_run: bool,
     auto_confirm: bool,
 ) -> AgentResult:
-    """Run the job application agent for the given URL.
+    """
+    Run the job application agent for the given URL.
 
     Args:
         job_url: URL of the job application form.
