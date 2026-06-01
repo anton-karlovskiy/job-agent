@@ -63,10 +63,10 @@ def apply(
 
     # Import here to keep startup fast (typer --help stays snappy)
     from job_agent.agent import run_application
-    from job_agent.profile import load_profile_context
+    from job_agent.profile import load_applicant_data
 
     try:
-        profile = load_profile_context(str(profile_path), str(resume_path))
+        applicant = load_applicant_data(str(profile_path), str(resume_path))
     except FileNotFoundError as exc:
         console.print(f"[red]{exc}[/red]")
         raise typer.Exit(code=1) from exc
@@ -74,7 +74,7 @@ def apply(
     result = asyncio.run(
         run_application(
             job_url=url,
-            profile=profile,
+            applicant=applicant,
             resume_path=str(resume_path.resolve()),
             model=model,
             headless=headless,

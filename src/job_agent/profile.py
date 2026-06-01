@@ -8,22 +8,22 @@ import yaml
 
 
 @dataclass
-class ProfileContext:
-    """Merged profile context consumed by all other modules."""
+class ApplicantData:
+    """Applicant profile and resume data consumed by all other modules."""
 
     yaml_data: dict[str, Any]
     resume_text: str
 
 
-def load_profile_context(profile_path: str, resume_path: str) -> ProfileContext:
-    """Load profile.yaml and the resume file into a ProfileContext.
+def load_applicant_data(profile_path: str, resume_path: str) -> ApplicantData:
+    """Load profile.yaml and the resume file into a ApplicantData.
 
     Args:
         profile_path: Absolute or relative path to profile.yaml.
         resume_path: Path to the resume — .md (preferred) or .pdf.
 
     Returns:
-        A ProfileContext with yaml_data and resume_text populated.
+        An ApplicantData with yaml_data and resume_text populated.
 
     Raises:
         FileNotFoundError: If either file does not exist.
@@ -47,7 +47,7 @@ def load_profile_context(profile_path: str, resume_path: str) -> ProfileContext:
     else:
         resume_text = resume_file.read_text(encoding="utf-8")
 
-    return ProfileContext(yaml_data=yaml_data, resume_text=resume_text)
+    return ApplicantData(yaml_data=yaml_data, resume_text=resume_text)
 
 
 def _extract_pdf_text(path: Path) -> str:

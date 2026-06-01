@@ -5,7 +5,7 @@ from typing import Any
 
 from browser_use import Agent, Browser, ChatOpenAI
 
-from job_agent.profile import ProfileContext
+from job_agent.profile import ApplicantData
 from job_agent.prompt import build_task_prompt
 from job_agent.tools import tools
 
@@ -21,7 +21,7 @@ class AgentResult:
 
 async def run_application(
     job_url: str,
-    profile: ProfileContext,
+    applicant: ApplicantData,
     resume_path: str,
     model: str,
     headless: bool,
@@ -32,7 +32,7 @@ async def run_application(
 
     Args:
         job_url: URL of the job application form.
-        profile: Loaded profile context.
+        applicant: Loaded applicant data.
         resume_path: Absolute path to the resume file.
         model: OpenAI model name (e.g. "gpt-4o").
         headless: Whether to run the browser in headless mode.
@@ -42,7 +42,7 @@ async def run_application(
     Returns:
         AgentResult with success flag, message, and optional error string.
     """
-    task = build_task_prompt(profile=profile, job_url=job_url, dry_run=dry_run)
+    task = build_task_prompt(applicant=applicant, job_url=job_url, dry_run=dry_run)
     llm: Any = ChatOpenAI(model=model)
     browser: Any = Browser(headless=headless, keep_alive=dry_run)
 
