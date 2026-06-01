@@ -46,7 +46,7 @@ async def run_application(
     """
     task = build_task_prompt(applicant=applicant, job_url=job_url, dry_run=dry_run)
     llm: Any = ChatOpenAI(model=model)
-    browser: Any = Browser(headless=headless)
+    browser: Any = Browser(headless=headless, keep_alive=dry_run)
 
     agent: Any = Agent(
         task=task,
