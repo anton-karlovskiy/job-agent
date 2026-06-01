@@ -38,13 +38,21 @@ def build_task_prompt(applicant: Applicant, job_url: str, dry_run: bool) -> str:
 
     style_rule = _NATURAL_HUMAN_STYLE if writing_style == "natural-human" else _FORMAL_STYLE
 
-    dry_run_notice = (
-        "\n\n> DRY RUN: Do NOT click submit. Stop just before the final submission step and report what you would have submitted."
+    submission_step = (
+        "**9. DRY RUN — stop before submitting**\n"
+        "Do NOT click submit. Report the full summary of what you would have submitted."
         if dry_run
-        else ""
+        else (
+            "**9. Before submitting — call `confirm_submit`**\n"
+            "Before clicking the final submit/apply/send button:\n"
+            "- Compile a two-column table: field name | value filled.\n"
+            "- Call `confirm_submit` with that table as the `summary` argument.\n"
+            "- If the user confirms → click submit.\n"
+            "- If the user declines → call `done` with success=False and note the reason."
+        )
     )
 
-    return f"""You are a job application assistant. Fill out and submit the job application at: {job_url}{dry_run_notice}
+    return f"""You are a job application assistant. Fill out and submit the job application at: {job_url}
 
 ---
 
@@ -58,54 +66,58 @@ def build_task_prompt(applicant: Applicant, job_url: str, dry_run: bool) -> str:
 ## INSTRUCTIONS
 
 **1. Navigate**
-Go to the job application URL.
+Use the `navigate` action to go to the job application URL.
 
-**2. Survey before filling**
-Scroll the entire form first. Before touching any field, note:
-- Which fields are required vs. optional
-- Whether a cover letter / motivation textarea is present
-- What file-upload inputs exist
+**2. Survey the form before filling anything**
+Use `scroll` to reach the bottom of the page, then call `extract` with the query
+"list every visible form field: label, type (text/dropdown/checkbox/file/textarea), and whether it is required".
+Study the result before touching any field.
 
 **3. Required fields — fill without exception**
-- If an answer isn't in the profile, infer the best one from the job description, company context on the page, and the applicant's background.
+- If an answer isn't in the profile, infer the best one from the job description, company context, and the applicant's background.
+- Use the `input` action for text fields. For checkboxes and radio buttons use `click`.
 - Do NOT call `ask_human` for essay questions, motivation questions, or ambiguous options — make a confident, tailored choice.
 - Writing style: {style_rule}
 
 **4. Substantive optional fields — always fill**
-These include: cover letters, personal statements, "Why this company?", motivation or essay questions.
-- They directly affect the hiring decision; treat them as required.
-- Generate a confident, tailored answer even when not explicitly covered by the profile.
+Cover letters, personal statements, "Why this company?", motivation or essay questions directly affect hiring.
+Treat them as required. Generate a confident, tailored answer even when not explicitly covered by the profile.
 
 **5. Low-signal optional fields — leave blank**
-Skip: demographic questions, referral codes, internal platform usernames, promo codes, "How did you hear about us?" (when no clear answer is in the profile).
-- Do not invent values for fields tracking a specific referral, internal ID, or optional demographic data.
+Skip: demographic questions, referral codes, internal platform usernames, promo codes,
+"How did you hear about us?" (when no clear answer is in the profile).
 
 **6. Cover letter fields**
 Distinguish between two types:
 - **Free-text textarea** — write a full prose cover letter (tone: {cover_letter_tone}). Use paragraphs, not bullets.
-- **File upload input** — skip entirely; do NOT upload the resume as a substitute. Only upload a dedicated cover letter file if one is explicitly available in your file list (separate from the resume).
-- If no cover letter field exists on the form, skip this step entirely.
+- **File upload input** — skip entirely; do NOT upload the resume as a substitute.
+  Only upload a dedicated cover letter file if one is explicitly in your available file list.
+- If no cover letter field exists, skip this step entirely.
 
 **7. File upload fields (resume / CV)**
-Use the built-in `upload_file` action. The resume path is already in your file list — pass its path and the DOM index of the file input.
+Use the `upload_file` action: pass the file path from your available file list and the DOM index of the file input.
 
 **8. Dropdowns and autocomplete fields (`role=combobox`)**
-- Click the field → type to filter → wait for the suggestion list → click the correct option.
-- Never leave a combobox after typing without confirming a selection.
-- If no option matches the profile AND the field is required → call `ask_human`.
+- Use `click` on the field → `input` to type and filter → wait for the suggestion list → `click` the correct option.
+- Never leave a combobox after typing without confirming a selection via `click`.
+- If the field is required and no option matches → call `ask_human`.
+- If a button or field is unclickable, use `send_keys` with "Tab Tab Enter" or "ArrowDown Enter" to navigate around it.
 
 **9. When to call `ask_human` (hard blockers only)**
 Call `ask_human` only when you are genuinely stuck:
 - CAPTCHA or bot-check
 - Unexpected login wall or MFA prompt
 - Required field with no inferable answer (e.g. internal employee ID, referral code)
-- Required dropdown whose available options don't match the applicant's profile (e.g. US-state selector when applicant has no US address)
+- Required dropdown whose options don't match the applicant at all
 
 Describe exactly what you encountered and what the user must do to unblock.
 
-**10. Finish**
+{submission_step}
+
+**10. Finish — call `done`**
 Call the `done` action with a human-readable summary covering:
 - Every field filled and the value used
 - Any fields skipped and why
 - Any blockers encountered
+- Whether submission was confirmed/completed, declined, or skipped (dry run)
 """

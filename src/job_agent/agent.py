@@ -7,7 +7,7 @@ from browser_use import Agent, Browser, ChatOpenAI
 
 from job_agent.applicant import Applicant
 from job_agent.prompt import build_task_prompt
-from job_agent.tools import tools
+from job_agent.tools import make_tools
 
 
 @dataclass
@@ -51,9 +51,9 @@ async def run_application(
         task=task,
         llm=llm,
         browser=browser,
-        tools=tools,
+        tools=make_tools(auto_confirm=auto_confirm),
         available_file_paths=available_file_paths,
-        max_failures=3,
+        max_actions_per_step=5,
     )
 
     try:
