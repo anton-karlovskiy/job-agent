@@ -88,16 +88,32 @@ dependencies = [
     "sqlalchemy>=2.0",
 ]
 
-[tool.uv.dev-dependencies]
+[dependency-groups]
 dev = [
-    "mypy",
+    "mypy>=1.0",
     "types-PyYAML",
+    "ruff",
+    "pytest>=9.0.3",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/job_agent"]
 
 [tool.mypy]
 python_version = "3.11"
 strict = true
 ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
 
 [project.scripts]
 job-agent = "job_agent.main:app"
@@ -231,12 +247,17 @@ job-agent profile check
 Responsibilities:
 - Load and validate `profile.yaml`
 - Load the resume: read `.md` directly as plain text; extract text from `.pdf` using `pypdf2` as a fallback
-- Return a merged context string + structured dict used in prompts
+- Return a dataclass consumed by all other modules
 
-Key function:
+Key type and function:
 ```python
-def load_profile(profile_path: str, resume_path: str) -> ProfileContext:
-    """Returns a ProfileContext with .yaml_data (dict) and .resume_text (str).
+@dataclass
+class ApplicantData:
+    profile_yaml: dict[str, Any]   # parsed profile.yaml contents
+    resume_text: str               # raw resume text
+
+def load_applicant_data(profile_path: str, resume_path: str) -> ApplicantData:
+    """Raises FileNotFoundError if either file is missing.
     
     resume_path may point to a .md file (preferred) or a .pdf file.
     """
@@ -252,7 +273,7 @@ Responsibilities:
 
 Key function:
 ```python
-def build_task_prompt(profile: ProfileContext, job_url: str, dry_run: bool) -> str:
+def build_task_prompt(applicantData: ApplicantData, job_url: str, dry_run: bool) -> str:
 ```
 
 The prompt must include an explicit instruction like:
@@ -265,34 +286,34 @@ Custom `browser-use` tool actions registered on the `Tools()` object:
 | Tool name | Description |
 |---|---|
 | `ask_human` | Pauses agent for hard blockers the AI cannot resolve (CAPTCHAs, login walls, MFA); prints a message describing what the user must do and waits for confirmation before continuing |
-| `upload_resume` | Handles resume file upload to detected file input elements |
-| `confirm_submit` | Prints a summary (including all AI-generated answers) and asks user to confirm before the agent clicks submit (unless `--yes` flag is set) |
+| `confirm_submit` | Prints a summary (including all AI-generated answers) and asks user to confirm before the agent clicks submit (unless `--yes` flag is set) — Phase 2 |
+
+File uploads are handled natively by `browser-use` via `available_file_paths` passed to the `Agent` constructor — no custom upload tool is needed.
 
 ```python
 from browser_use import Tools
-from rich.prompt import Prompt
 
 tools = Tools()
 
 @tools.action(description="Interrupt the user only for hard blockers you cannot bypass yourself: CAPTCHAs, login walls, MFA prompts, or required fields with no inferable answer. Do NOT call this for open-ended questions or missing profile fields — generate a best answer instead.")
-def ask_human(message: str) -> str:
-    return Prompt.ask(f"[yellow]Agent needs your input[/yellow]\n{message}")
+async def ask_human(message: str) -> ActionResult:
+    ...
 ```
 
 ### `agent.py`
 
 Responsibilities:
-- Instantiate `ChatOpenAI` with the configured model
-- Instantiate `Browser` with headless/headful setting
-- Instantiate `browser-use` `Agent` with task prompt, LLM, browser, and custom tools
+- Instantiate `ChatOpenAI` (imported from `browser_use`) with the configured model
+- Instantiate `Browser` with headless/headful setting (`keep_alive=dry_run` so the window stays open on dry runs)
+- Instantiate `browser-use` `Agent` with task, LLM, browser, custom tools, `available_file_paths`, and `max_failures=3`
 - Run the agent and return the result
-- Handle errors and timeouts gracefully
+- Handle `TimeoutError` and general exceptions gracefully
 
 ```python
 async def run_application(
     job_url: str,
-    profile: ProfileContext,
-    resume_path: str,
+    applicant: ApplicantData,
+    available_file_paths: list[str],
     model: str,
     headless: bool,
     dry_run: bool,
@@ -356,7 +377,7 @@ The prompt passed to `browser-use` should follow this structure:
 You are a job application assistant. Your goal is to fill out and submit the job application at: {url}
 
 APPLICANT PROFILE:
-{yaml_data as formatted text}
+{profile_yaml as formatted text}
 
 RESUME TEXT:
 {resume_text}
@@ -367,7 +388,7 @@ INSTRUCTIONS:
 3. Fill out every field — do not skip optional fields.
 4. If a field is not explicitly covered by the profile, generate the best possible answer using the job description, company context visible on the page, and the applicant's background. Do NOT call `ask_human` for open-ended essay questions, motivation questions, or ambiguous options — make a confident, tailored choice. Write in natural, varied prose. Avoid em-dashes, AI-associated buzzwords ("leverage", "spearhead", "delve", "I am thrilled to"), and bullet-heavy structure. Vary sentence length. Contractions are fine where the tone allows.
 5. For cover letter fields: write a tailored cover letter using the profile and any job description text visible on the page. Tone: {cover_letter_tone}. Use prose paragraphs, not bullets. Avoid em-dashes and overused opener phrases. Every sentence should sound like it was typed by the applicant, not generated.
-6. For file upload fields: use the `upload_resume` tool.
+6. For file upload fields: pass the resume path from `available_file_paths` to the built-in `upload_file` action.
 7. Before clicking submit: call the `confirm_submit` tool to show the user a full summary of all filled fields (including AI-generated answers) so they can review and confirm. [omit if --yes flag]
 8. Call `ask_human` only when you hit a hard blocker you cannot bypass: a CAPTCHA, an unexpected login wall, an MFA prompt, or a required field with no inferable answer (e.g. an internal employee ID). Describe exactly what you encountered and what the user needs to do.
 9. After successful submission, use the `done` action with a human-readable summary of all fields filled and any blockers encountered.
@@ -386,7 +407,7 @@ For any field the profile does not explicitly cover, the agent generates the bes
 - **Open-ended / motivational questions** (e.g. "Why do you want to work here?", "Describe a challenge you overcame") — agent writes a tailored response using the job description, visible company context, and the applicant's background.
 - **Ambiguous options** (e.g. salary range, start date) — agent makes a reasonable choice informed by the job posting and profile defaults.
 
-All AI-generated answers are surfaced in the pre-submission review (`confirm_submit`) so the user can read through everything and edit in the browser before confirming.
+All AI-generated answers will be surfaced in the pre-submission review (`confirm_submit`, Phase 2) so the user can read through everything and edit in the browser before confirming.
 
 ### `ask_human` — reserved for hard blockers only
 
@@ -468,17 +489,17 @@ After each run, `job-agent log` displays:
 
 ### Phase 1 — core (start here)
 - [ ] Project scaffold with `uv`, `pyproject.toml`, folder structure
-- [ ] `profile.py` — load YAML + parse PDF resume
-- [ ] `tools.py` — `ask_human` and `upload_resume` tools
-- [ ] `agent.py` — wire up `browser-use` Agent with OpenAI
-- [ ] `prompt.py` — task prompt builder
+- [ ] `profile.py` — `ApplicantData` dataclass, `load_applicant_data()`, YAML + PDF/MD resume loading
+- [ ] `tools.py` — `ask_human` tool (file uploads handled natively via `available_file_paths`)
+- [ ] `agent.py` — `run_application()` wiring `ChatOpenAI` + `Browser` + `Agent`; returns `AgentResult`
+- [ ] `prompt.py` — task prompt builder with writing-style injection
 - [ ] `main.py` — `job-agent apply` CLI command
 - [ ] Manual test against a real job application URL
 
 ### Phase 2 — quality of life
-- [ ] `logger.py` — SQLite application log
+- [ ] `logger.py` — SQLite application log (SQLAlchemy 2.0 ORM)
 - [ ] `job-agent log` command
-- [ ] `confirm_submit` tool + `--yes` / `--dry-run` flags
+- [ ] `confirm_submit` tool + `--yes` flag
 - [ ] `job-agent profile check` command
 - [ ] `.env.example` and README
 
