@@ -27,13 +27,13 @@ def _root() -> None:
 def apply(
     url: str = typer.Argument(..., help="Job application URL"),
     profile_path: Path = typer.Option(
-        Path("./profile/profile.yaml"),
+        Path("./applicant/profile.yaml"),
         "--profile",
         help="Path to profile.yaml",
         show_default=True,
     ),
     resume_path: Path = typer.Option(
-        Path("./profile/resume.md"),
+        Path("./applicant/resume.md"),
         "--resume",
         help="Path to resume (.md preferred, .pdf also accepted)",
         show_default=True,
@@ -63,10 +63,10 @@ def apply(
 
     # Import here to keep startup fast (typer --help stays snappy)
     from job_agent.agent import run_application
-    from job_agent.profile import load_applicant_data
+    from job_agent.applicant import load_applicant
 
     try:
-        applicant = load_applicant_data(str(profile_path), str(resume_path))
+        applicant = load_applicant(str(profile_path), str(resume_path))
     except FileNotFoundError as exc:
         console.print(f"[red]{exc}[/red]")
         raise typer.Exit(code=1) from exc

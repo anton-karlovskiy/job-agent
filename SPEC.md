@@ -2,7 +2,7 @@
 
 ## Overview
 
-`job-agent` is a CLI tool that automates filling out and submitting online job application forms. It uses `browser-use` for AI-driven browser automation and OpenAI as the LLM brain. Given a job posting URL and the user's profile/resume, it navigates to the form, fills it out intelligently, writes cover letters and screening answers, and pauses to ask the user when it encounters questions it cannot confidently answer.
+`job-agent` is a CLI tool that automates filling out and submitting online job application forms. It uses `browser-use` for AI-driven browser automation and OpenAI as the LLM brain. Given a job posting URL and the user's applicant/resume, it navigates to the form, fills it out intelligently, writes cover letters and screening answers, and pauses to ask the user when it encounters questions it cannot confidently answer.
 
 ---
 
@@ -51,15 +51,15 @@ job-agent/
 ├── .gitignore
 ├── README.md
 ├── SPEC.md
-├── profile/
+├── applicant/
 │   ├── resume.md             # User's resume (Markdown preferred; .pdf also accepted)
-│   └── profile.yaml          # Structured personal/professional info
+│   └── profile.yaml          # Structured personal/professional info (gitignored)
 ├── src/
 │   └── job_agent/
 │       ├── __init__.py
 │       ├── main.py           # CLI entry point (typer app)
 │       ├── agent.py          # browser-use Agent setup and run loop
-│       ├── profile.py        # Load and merge resume + profile.yaml
+│       ├── applicant.py      # Applicant dataclass + load_applicant()
 │       ├── prompt.py         # Build task prompt string for the agent
 │       ├── tools.py          # Custom browser-use tool actions
 │       ├── logger.py         # SQLite application log
@@ -133,7 +133,7 @@ uv run mypy src/
 
 ---
 
-## Profile schema (`profile/profile.yaml`)
+## Profile schema (`applicant/profile.yaml`)
 
 This file is the single source of truth for the agent. All fields are optional but the more complete it is, the fewer questions the agent needs to ask.
 
@@ -209,8 +209,8 @@ Main command. Navigates to the job URL and runs the application agent.
 job-agent apply <url> [options]
 
 Options:
-  --profile PATH     Path to profile.yaml (default: ./profile/profile.yaml)
-  --resume PATH      Path to resume file — .md (preferred) or .pdf (default: ./profile/resume.md)
+  --profile PATH     Path to profile.yaml (default: ./applicant/profile.yaml)
+  --resume PATH      Path to resume file — .md (preferred) or .pdf (default: ./applicant/resume.md)
   --model TEXT       OpenAI model override (default: from .env)
   --headless         Run browser in headless mode
   --dry-run          Fill the form but do not submit
@@ -252,11 +252,11 @@ Responsibilities:
 Key type and function:
 ```python
 @dataclass
-class ApplicantData:
+class Applicant:
     profile_yaml: dict[str, Any]   # parsed profile.yaml contents
     resume_text: str               # raw resume text
 
-def load_applicant_data(profile_path: str, resume_path: str) -> ApplicantData:
+def load_applicant(profile_path: str, resume_path: str) -> Applicant:
     """Raises FileNotFoundError if either file is missing.
     
     resume_path may point to a .md file (preferred) or a .pdf file.
@@ -273,7 +273,7 @@ Responsibilities:
 
 Key function:
 ```python
-def build_task_prompt(applicantData: ApplicantData, job_url: str, dry_run: bool) -> str:
+def build_task_prompt(applicant: Applicant, job_url: str, dry_run: bool) -> str:
 ```
 
 The prompt must include an explicit instruction like:
@@ -312,7 +312,7 @@ Responsibilities:
 ```python
 async def run_application(
     job_url: str,
-    applicant: ApplicantData,
+    applicant: Applicant,
     available_file_paths: list[str],
     model: str,
     headless: bool,
@@ -489,7 +489,7 @@ After each run, `job-agent log` displays:
 
 ### Phase 1 — core (start here)
 - [ ] Project scaffold with `uv`, `pyproject.toml`, folder structure
-- [ ] `profile.py` — `ApplicantData` dataclass, `load_applicant_data()`, YAML + PDF/MD resume loading
+- [ ] `applicant.py` — `Applicant` dataclass, `load_applicant()`, YAML + PDF/MD resume loading
 - [ ] `tools.py` — `ask_human` tool (file uploads handled natively via `available_file_paths`)
 - [ ] `agent.py` — `run_application()` wiring `ChatOpenAI` + `Browser` + `Agent`; returns `AgentResult`
 - [ ] `prompt.py` — task prompt builder with writing-style injection
@@ -519,7 +519,7 @@ After each run, `job-agent log` displays:
 - All async code uses `asyncio`; entry point calls `asyncio.run(...)`
 - `browser-use` `Agent.run()` is async — wrap appropriately in `main.py`
 - Keep prompts in `prompt.py`, not scattered in `agent.py`
-- The `profile/` directory should be in `.gitignore` (contains personal data)
+- The `applicant/` directory should be in `.gitignore` (contains personal data)
 - Test with `--dry-run` first on any real job URL before enabling submission
 - Default resume format is **Markdown** (`.md`); use `pypdf2` only when the provided file has a `.pdf` extension
 - All source files must pass `uv run mypy src/` with `strict = true`; annotate every function signature and use `from __future__ import annotations` at the top of each module

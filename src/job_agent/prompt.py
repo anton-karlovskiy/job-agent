@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import yaml
 
-from job_agent.profile import ApplicantData
+from job_agent.applicant import Applicant
 
 _NATURAL_HUMAN_STYLE = (
     "Write all free-text so it sounds naturally composed by the applicant: "
@@ -19,20 +19,20 @@ _FORMAL_STYLE = (
 )
 
 
-def build_task_prompt(applicantData: ApplicantData, job_url: str, dry_run: bool) -> str:
+def build_task_prompt(applicant: Applicant, job_url: str, dry_run: bool) -> str:
     """Build the task prompt string sent to the browser-use Agent.
 
     Args:
-        applicantData: Loaded applicant data containing profile yaml and resume text.
+        applicant: Loaded applicant containing profile yaml and resume text.
         job_url: URL of the job application form.
         dry_run: If True, instruct the agent not to click submit.
 
     Returns:
         A complete task prompt string.
     """
-    profile_text = yaml.dump(applicantData.profile_yaml, default_flow_style=False, allow_unicode=True)
+    profile_text = yaml.dump(applicant.profile_yaml, default_flow_style=False, allow_unicode=True)
 
-    preferences: dict[str, str] = applicantData.profile_yaml.get("preferences", {})
+    preferences: dict[str, str] = applicant.profile_yaml.get("preferences", {})
     cover_letter_tone: str = preferences.get("cover_letter_tone", "professional")
     writing_style: str = preferences.get("writing_style", "natural-human")
 
@@ -51,7 +51,7 @@ def build_task_prompt(applicantData: ApplicantData, job_url: str, dry_run: bool)
 ## APPLICANT PROFILE
 {profile_text}
 ## APPLICANT RESUME
-{applicantData.resume_text}
+{applicant.resume_text}
 
 ---
 

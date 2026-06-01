@@ -37,14 +37,14 @@ The data flow for a single `apply` run:
 
 ```
 main.py (typer CLI)
-  → profile.py          loads profile.yaml + resume (.md preferred, .pdf fallback)
+  → applicant.py        loads profile.yaml + resume (.md preferred, .pdf fallback)
   → prompt.py           builds the task string sent to browser-use Agent
   → agent.py            instantiates ChatOpenAI + Browser + Agent, calls Agent.run()
-      ↕ tools.py        custom browser-use actions (ask_human, upload_resume, confirm_submit)
+      ↕ tools.py        custom browser-use actions (ask_human, confirm_submit)
   → logger.py           writes SQLAlchemy Application row to applications.db
 ```
 
-**`profile.py`** returns an `ApplicantData` dataclass with `.profile_yaml` (dict) and `.resume_text` (str). All other modules consume this type — it is the canonical profile representation.
+**`applicant.py`** returns an `Applicant` dataclass with `.profile_yaml` (dict) and `.resume_text` (str). All other modules consume this type — it is the canonical applicant representation.
 
 **`prompt.py`** is the single source of all prompt text. No prompt strings belong in `agent.py` or elsewhere. The prompt embeds the full profile context and explicit autonomy/style rules (no em-dashes, no AI buzzwords, autonomous answers for open-ended fields, `ask_human` only for hard blockers).
 
@@ -58,7 +58,7 @@ main.py (typer CLI)
 
 - Every source file starts with `from __future__ import annotations`.
 - All public function signatures are fully annotated; `uv run mypy src/` with `strict = true` must pass clean.
-- `profile/` is `.gitignore`d — it contains personal data. Never commit it.
+- `applicant/` is `.gitignore`d — it contains personal data. Never commit it.
 - Default resume format is `.md`; use `pypdf2` only when the file extension is `.pdf`.
 - Always test new form automation with `--dry-run` before enabling submission.
 - The `browser-use` `Agent.run()` call is async — the entry point wraps it with `asyncio.run()`.

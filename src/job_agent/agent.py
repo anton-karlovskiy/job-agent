@@ -5,7 +5,7 @@ from typing import Any
 
 from browser_use import Agent, Browser, ChatOpenAI
 
-from job_agent.profile import ApplicantData
+from job_agent.applicant import Applicant
 from job_agent.prompt import build_task_prompt
 from job_agent.tools import tools
 
@@ -21,7 +21,7 @@ class AgentResult:
 
 async def run_application(
     job_url: str,
-    applicant: ApplicantData,
+    applicant: Applicant,
     available_file_paths: list[str],
     model: str,
     headless: bool,
@@ -33,7 +33,7 @@ async def run_application(
 
     Args:
         job_url: URL of the job application form.
-        applicant: Loaded applicant data.
+        applicant: Loaded applicant.
         available_file_paths: Absolute paths to files the agent may upload (e.g. resume).
         model: OpenAI model name (e.g. "gpt-4o").
         headless: Whether to run the browser in headless mode.
