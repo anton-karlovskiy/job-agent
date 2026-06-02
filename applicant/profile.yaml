@@ -1,0 +1,112 @@
+personal:
+  name: Kevin Kamto
+  email: kevin.kamto.us@outlook.com
+  phone: "+1 828 379 3642"
+  location: Boone, North Carolina, US
+  address:
+    street: 130 Bruce Shelton Blvd
+    city: Boone
+    state: North Carolina
+    state_abbr: NC
+    zip: "28607"
+    country: United States
+  linkedin: https://www.linkedin.com/in/kevin-kamto
+  github: https://github.com/user2745
+  twitter: https://twitter.com/theregoeskevin
+  telegram: https://t.me/kevin_kamto
+  calendly: https://calendly.com/kamtokevin/30min
+
+target:
+  roles:
+    - AI Engineer
+    - Senior Full-Stack Developer
+    - Senior Frontend Engineer
+    - Senior Backend Engineer
+  seniority: Senior
+  industries:
+    - AI / ML
+    - web / mobile
+    - fintech
+    - blockchain / web3
+  preferred_locations:
+    - Remote
+  willing_to_relocate: false
+  work_authorization: "US Citizen"  # fill in: e.g. "US Citizen", "Require sponsorship"
+
+experience:
+  years_total: 9
+  current_title: AI Engineer & Senior Full-Stack Developer
+  current_company: Prediction Labs
+  summary: >
+    Software engineer with 9 years of experience in AI, blockchain, and full-stack web development. Specialized in designing secure distributed systems, implementing decentralized protocols, and applying machine learning to real-world problems. Adept at leading engineering teams, collaborating across domains, and delivering production-grade systems in fast-paced environments.
+
+skills:
+  languages:
+    - TypeScript
+    - JavaScript
+    - Python
+    - Solidity
+  frameworks:
+    - React
+    - Next.js
+    - Vue
+    - Nuxt
+    - Node.js
+    - FastAPI
+    - GraphQL
+  ai_ml:
+    - PyTorch
+    - TensorFlow
+    - scikit-learn
+    - transformers.js
+    - LLM integration
+    - model fine-tuning
+    - RAG
+    - MCP workflows
+    - Agentic Engineering
+  blockchain:
+    - Ethereum
+    - Polkadot
+    - Solidity
+    - Hardhat
+    - Foundry
+    - viem
+    - ethers.js
+    - wagmi
+  tools:
+    - NumPy
+    - pandas
+    - Docker
+    - PostgreSQL
+
+education:
+  - degree: Bachelor's degree
+    school: Appalachian State University
+    year: 2018
+
+compensation:
+  desired_salary_usd: 140000
+  open_to_equity: true
+
+preferences:
+  cover_letter_tone: professional
+  writing_style: natural-human
+
+answers:
+  why_this_company: >
+    I'm drawn to companies building meaningful products at the intersection of AI and
+    developer experience. I want to work on problems where deep technical craft actually
+    matters — not just shipping features, but making the underlying system noticeably
+    better.
+  greatest_strength: >
+    I bridge research and production. I can take an AI concept from prototype to a
+    reliable, observable system that engineers trust — which is rare. At Google Chrome I
+    led LLM integration and MCP-based workflows that went from experiments to
+    production developer tooling.
+  greatest_weakness: >
+    I can go deep on a hard technical problem and lose track of time. I've learned to
+    timebox exploration sessions and surface findings daily so the team isn't blocked
+    waiting for me.
+  years_of_experience: "9"
+  willing_to_relocate: "No"
+  visa_sponsorship_required: "No"
