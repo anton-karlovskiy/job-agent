@@ -4,7 +4,6 @@ version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
     "browser-use>=0.12",
-    "langchain-openai",
     "typer[all]",
     "rich",
     "pyyaml",
