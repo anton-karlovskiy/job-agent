@@ -60,7 +60,7 @@ def apply(
 
     # Import here to keep startup fast (typer --help stays snappy)
     from job_agent.agent import make_llm, run_application
-    from job_agent.applicant import load_applicant
+    from job_agent.applicant import load_applicant, resume_as_pdf
 
     try:
         llm = make_llm(_LLM_PROVIDER, _LLM_MODEL)
@@ -82,17 +82,18 @@ def apply(
         console.print(f"[red]{exc}[/red]")
         raise typer.Exit(code=1) from exc
 
-    result = asyncio.run(
-        run_application(
-            job_url=url,
-            applicant=applicant,
-            available_file_paths=[str(resume_path.resolve())],
-            llm=llm,
-            headless=headless,
-            dry_run=dry_run,
-            auto_confirm=yes,
+    with resume_as_pdf(resume_path) as pdf_path:
+        result = asyncio.run(
+            run_application(
+                job_url=url,
+                applicant=applicant,
+                available_file_paths=[pdf_path],
+                llm=llm,
+                headless=headless,
+                dry_run=dry_run,
+                auto_confirm=yes,
+            )
         )
-    )
 
     if result.success:
         console.rule("[green]Done[/green]")

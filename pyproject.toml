@@ -8,6 +8,8 @@ dependencies = [
     "rich",
     "pyyaml",
     "pypdf2",
+    "markdown",
+    "xhtml2pdf",
     "python-dotenv",
     "sqlalchemy>=2.0",
 ]

@@ -53,7 +53,11 @@ def build_task_prompt(applicant: Applicant, job_url: str, dry_run: bool) -> str:
     )
 
     compensation: dict[str, object] = applicant.profile_yaml.get("compensation", {})
-    desired_salary: int = int(compensation.get("desired_salary_usd", 0))
+    _raw_salary = compensation.get("desired_salary_usd", 0)
+    try:
+        desired_salary: int = int(_raw_salary) if isinstance(_raw_salary, (int, float, str)) else 0
+    except ValueError:
+        desired_salary = 0
     desired_salary_formatted: str = f"{desired_salary:,}" if desired_salary else "negotiable"
 
     return f"""You are a job application assistant. Fill out and submit the job application at: {job_url}
