@@ -85,6 +85,20 @@ For fields not in your profile, the agent generates a best-effort answer autonom
 | `BROWSER_HEADLESS` | `true`/`false` — headless mode |
 | `LOG_DB_PATH` | SQLite log path (default: `./applications.db`) |
 
+## Related projects
+
+Other open-source job-application tools, for comparison:
+
+| Project | Stars | Approach | Notes |
+|---|---|---|---|
+| [AIHawk](https://github.com/feder-cr/Jobs_Applier_AI_Agent_AIHawk) | ~30k | LLM-driven, tailored answers | Most popular; **archived/unmaintained** |
+| [Auto_job_applier_linkedIn](https://github.com/GodsScion/Auto_job_applier_linkedIn) | ~2.4k | Selenium, LinkedIn Easy Apply | Best actively-maintained option |
+| [ApplyPilot](https://github.com/Pickle-Pixel/ApplyPilot) | ~1.1k | Agentic, "any site, any form" | Closest in ambition to this project |
+| [EasyApplyJobsBot](https://github.com/wodsuz/EasyApplyJobsBot) | ~0.8k | Scripted, multi-board | LinkedIn, Glassdoor, Greenhouse, etc. |
+| [career-ops](https://github.com/santifer/career-ops) | — | Claude Code-based | A–F scoring, ATS PDF gen, scans Greenhouse/Ashby/Lever |
+
+Most popular tools are scripted Selenium bots targeting LinkedIn Easy Apply (which bans automation). This project is distinct in being **browser-use + LLM-agent-driven**, working on any form autonomously.
+
 ## Development
 
 ```bash
