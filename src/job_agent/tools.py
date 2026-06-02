@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+import functools
 from typing import Any
 
 from browser_use import ActionResult, Tools
@@ -41,8 +43,10 @@ def make_tools(auto_confirm: bool = False) -> Tools[Any]:
         console.rule("[yellow]Agent needs your input[/yellow]")
         console.print(f"[bold]{message}[/bold]")
         try:
-            answer = Prompt.ask("[dim]Your response (or press Enter when done)[/dim]")
-        except EOFError:
+            answer = await asyncio.to_thread(
+                functools.partial(Prompt.ask, "[dim]Your response (or press Enter when done)[/dim]")
+            )
+        except (EOFError, asyncio.CancelledError):
             answer = ""
         if not answer:
             return ActionResult(
@@ -85,8 +89,10 @@ def make_tools(auto_confirm: bool = False) -> Tools[Any]:
         console.rule("[cyan]Ready to submit — please review[/cyan]")
         console.print(summary)
         try:
-            answer = Prompt.ask("[bold]Submit the application? [y/N][/bold]", default="n")
-        except EOFError:
+            answer = await asyncio.to_thread(
+                functools.partial(Prompt.ask, "[bold]Submit the application? [y/N][/bold]", default="n")
+            )
+        except (EOFError, asyncio.CancelledError):
             answer = "n"
 
         if answer.strip().lower() in ("y", "yes"):

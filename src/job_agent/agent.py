@@ -92,6 +92,7 @@ async def run_application(
         tools=make_tools(auto_confirm=auto_confirm),
         available_file_paths=available_file_paths,
         max_actions_per_step=5,
+        step_timeout=600,
     )
 
     try:
