@@ -22,7 +22,6 @@ target:
     - blockchain / web3
   preferred_locations:
     - Remote
-  willing_to_relocate: false
   open_to_relocation: false
   notice_period: "immediately"
   work_authorization:
@@ -109,6 +108,3 @@ answers:
     I can go deep on a hard technical problem and lose track of time. I've learned to
     timebox exploration sessions and surface findings daily so the team isn't blocked
     waiting for me.
-  years_of_experience: "10"
-  willing_to_relocate: "No"
-  visa_sponsorship_required: "No"  # fill in: "Yes" or "No"
