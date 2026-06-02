@@ -1,5 +1,6 @@
 personal:
-  name: Anton Karlovskiy
+  first_name: Anton
+  last_name: Karlovskiy
   email: antonkarlovskiy@outlook.com
   phone: ""
   location: Remote
@@ -22,7 +23,12 @@ target:
   preferred_locations:
     - Remote
   willing_to_relocate: false
-  work_authorization: "EU Citizen"  # fill in: e.g. "US Citizen", "Require sponsorship"
+  open_to_relocation: false
+  notice_period: "immediately"
+  work_authorization:
+    citizenship: EU Citizen
+    authorized: true
+    sponsorship_needed: false
 
 experience:
   years_total: 10

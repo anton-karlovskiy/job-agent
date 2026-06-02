@@ -1,5 +1,6 @@
 personal:
-  name: Kevin Kamto
+  first_name: Kevin
+  last_name: Kamto
   email: kevin.kamto.us@outlook.com
   phone: "+1 828 379 3642"
   location: Boone, North Carolina, US
@@ -31,7 +32,12 @@ target:
   preferred_locations:
     - Remote
   willing_to_relocate: false
-  work_authorization: "US Citizen"  # fill in: e.g. "US Citizen", "Require sponsorship"
+  open_to_relocation: false
+  notice_period: "immediately"
+  work_authorization:
+    citizenship: US Citizen
+    authorized: true
+    sponsorship_needed: false
 
 experience:
   years_total: 9

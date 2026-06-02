@@ -32,7 +32,7 @@
 | Language | Python 3.11+ | Ecosystem fit |
 | Package manager | `uv` | Fast, modern, replaces pip |
 | Browser automation | `browser-use` | AI-native agent loop built on Playwright |
-| LLM | Provider-agnostic (`openai` default, also `anthropic`, `google`, `browseruse`) | `browser-use` re-exports LangChain chat models for all major providers |
+| LLM | Provider-agnostic (`google` default, also `openai`, `anthropic`, `groq`, `browseruse`) | `browser-use` re-exports LangChain chat models for all major providers |
 | CLI | `typer` + `rich` | Clean CLI with pretty output |
 | Config/profile | YAML + Markdown resume (PDF also supported) | Human-editable, AI-friendly; Markdown is preferred because it parses cleanly without extraction libraries |
 | Storage | SQLite via `sqlalchemy` (ORM) | Zero-setup application log; declarative ORM models with full type safety |
@@ -79,8 +79,7 @@ version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
     "browser-use>=0.12",
-    "langchain-openai",
-    "typer[all]",
+    "typer",
     "rich",
     "pyyaml",
     "pypdf2",          # only needed for PDF resume fallback
@@ -143,47 +142,65 @@ personal:
   last_name: Doe
   email: jane@example.com
   phone: "+1-555-555-5555"
-  address: "123 Main St"
-  city: Stockholm
-  postal_code: "11122"
-  country: Sweden
+  location: Stockholm, Sweden
+  address:
+    street: 123 Main St
+    city: Stockholm
+    state: ""
+    zip: "11122"
+    country: Sweden
   linkedin: https://linkedin.com/in/janedoe
   github: https://github.com/janedoe
   website: https://janedoe.dev
 
-work_authorization:
-  authorized: true          # legally authorized to work
-  sponsorship_needed: false
+target:
+  roles:
+    - Senior Software Developer
+  seniority: Senior
+  preferred_locations:
+    - Remote
+  willing_to_relocate: false
+  work_authorization: "US Citizen"  # e.g. "US Citizen", "Require sponsorship"
 
-professional:
-  title: "Senior Software Developer"
-  years_experience: 7
+experience:
+  years_total: 7
+  current_title: "Senior Software Developer"
+  current_company: "Acme Corp"
   summary: >
     Full-stack software developer with 7 years of experience across
-    web, mobile, and backend systems. Strong in Python, TypeScript,
-    and cloud infrastructure.
-  skills:
+    web, mobile, and backend systems.
+
+skills:
+  languages:
     - Python
     - TypeScript
+  frameworks:
     - React
     - Node.js
-    - PostgreSQL
+  tools:
     - Docker
+    - PostgreSQL
     - AWS
-  desired_salary: "120000 USD"
-  notice_period: "4 weeks"
-  open_to_remote: true
-  open_to_relocation: false
 
 education:
   - degree: "B.Sc. Computer Science"
-    institution: "Uppsala University"
+    school: "Uppsala University"
     year: 2017
+
+compensation:
+  desired_salary_usd: 120000    # integer; used by prompt.py to format salary fields
+  open_to_equity: true
 
 preferences:
   cover_letter_tone: professional   # professional | casual | enthusiastic
-  cover_letter_length: medium       # short | medium | long
   writing_style: natural-human      # natural-human (default) | formal
+
+# Optional: pre-written answers the agent will use verbatim for common questions.
+answers:
+  why_this_company: >
+    I'm drawn to companies building meaningful products...
+  greatest_strength: >
+    I bridge research and production...
 ```
 
 ---
@@ -191,7 +208,11 @@ preferences:
 ## Environment variables (`.env`)
 
 ```
-OPENAI_API_KEY=sk-...        # set the key matching the provider in main.py
+OPENAI_API_KEY=sk-...        # set the key(s) matching your configured provider(s)
+ANTHROPIC_API_KEY=sk-ant-...
+GOOGLE_API_KEY=...
+BROWSER_USE_API_KEY=bu_...   # only needed for browseruse provider
+GROQ_API_KEY=gsk_...         # only needed for groq provider
 BROWSER_HEADLESS=false
 LOG_DB_PATH=./applications.db
 ```
@@ -303,9 +324,9 @@ async def ask_human(message: str) -> ActionResult:
 ### `agent.py`
 
 Responsibilities:
-- Accept an already-instantiated `llm` (created by `make_llm()` in `main.py`)
+- Define `make_llm(provider, model)` which `main.py` calls to instantiate the LangChain chat model
 - Instantiate `Browser` with headless/headful setting (`keep_alive=dry_run` so the window stays open on dry runs)
-- Instantiate `browser-use` `Agent` with task, LLM, browser, custom tools, `available_file_paths`, and `max_failures=3`
+- Instantiate `browser-use` `Agent` with task, LLM, browser, custom tools, and `available_file_paths`
 - Run the agent and return the result
 - Handle `TimeoutError` and general exceptions gracefully
 
@@ -488,13 +509,13 @@ After each run, `job-agent log` displays:
 ## Development phases
 
 ### Phase 1 — core (start here)
-- [ ] Project scaffold with `uv`, `pyproject.toml`, folder structure
-- [ ] `applicant.py` — `Applicant` dataclass, `load_applicant()`, YAML + PDF/MD resume loading
-- [ ] `tools.py` — `ask_human` tool (file uploads handled natively via `available_file_paths`)
-- [ ] `agent.py` — `run_application()` wiring LLM + `Browser` + `Agent`; returns `AgentResult`
-- [ ] `prompt.py` — task prompt builder with writing-style injection
-- [ ] `main.py` — `job-agent apply` CLI command
-- [ ] Manual test against a real job application URL
+- [x] Project scaffold with `uv`, `pyproject.toml`, folder structure
+- [x] `applicant.py` — `Applicant` dataclass, `load_applicant()`, YAML + PDF/MD resume loading
+- [x] `tools.py` — `ask_human` tool (file uploads handled natively via `available_file_paths`)
+- [x] `agent.py` — `run_application()` wiring LLM + `Browser` + `Agent`; returns `AgentResult`
+- [x] `prompt.py` — task prompt builder with writing-style injection
+- [x] `main.py` — `job-agent apply` CLI command
+- [x] Manual test against a real job application URL
 
 ### Phase 2 — quality of life
 - [ ] `logger.py` — SQLite application log (SQLAlchemy 2.0 ORM)
