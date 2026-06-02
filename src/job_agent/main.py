@@ -12,8 +12,8 @@ load_dotenv()
 # LLM configuration — edit here to switch provider or model.
 # Providers: openai | anthropic | google | groq | browseruse
 # Model: None uses the provider default (gpt-4o / claude-sonnet-4-6 / gemini-2.0-flash)
-_LLM_PROVIDER = "anthropic"
-_LLM_MODEL: str | None = "claude-sonnet-4-6"
+_LLM_PROVIDER = "google"
+_LLM_MODEL: str | None = "gemini-2.5-flash"
 
 app = typer.Typer(
     name="job-agent",
