@@ -39,11 +39,11 @@ def build_task_prompt(applicant: Applicant, job_url: str, dry_run: bool) -> str:
     style_rule = _NATURAL_HUMAN_STYLE if writing_style == "natural-human" else _FORMAL_STYLE
 
     submission_step = (
-        "**9. DRY RUN — stop before submitting**\n"
+        "**11. DRY RUN — stop before submitting**\n"
         "Do NOT click submit. Report the full summary of what you would have submitted."
         if dry_run
         else (
-            "**9. Before submitting — call `confirm_submit`**\n"
+            "**11. Before submitting — call `confirm_submit`**\n"
             "Before clicking the final submit/apply/send button:\n"
             "- Compile a two-column table: field name | value filled.\n"
             "- Call `confirm_submit` with that table as the `summary` argument.\n"
@@ -97,13 +97,19 @@ Distinguish between two types:
 **7. File upload fields (resume / CV)**
 Use the `upload_file` action: pass the file path from your available file list and the DOM index of the file input.
 
-**8. Dropdowns and autocomplete fields (`role=combobox`)**
+**8. Phone number fields**
+Many forms split a phone number into two fields: a country-code dropdown and a local-number text input.
+- When both exist, select the country code in the dropdown and enter **only the local number (no country code, no leading +)** in the text field.
+  Example: profile has `+1 828-379-3642` → set dropdown to `+1`, type `828-379-3642` in the text field.
+- When there is a single combined field, enter the full international number as stored in the profile.
+
+**9. Dropdowns and autocomplete fields (`role=combobox`)**
 - Use `click` on the field → `input` to type and filter → wait for the suggestion list → `click` the correct option.
 - Never leave a combobox after typing without confirming a selection via `click`.
 - If the field is required and no option matches → call `ask_human`.
 - If a button or field is unclickable, use `send_keys` with "Tab Tab Enter" or "ArrowDown Enter" to navigate around it.
 
-**9. When to call `ask_human` (hard blockers only)**
+**10. When to call `ask_human` (hard blockers only)**
 Call `ask_human` only when you are genuinely stuck:
 - CAPTCHA or bot-check
 - Unexpected login wall or MFA prompt
@@ -114,7 +120,7 @@ Describe exactly what you encountered and what the user must do to unblock.
 
 {submission_step}
 
-**10. Finish — call `done`**
+**12. Finish — call `done`**
 Call the `done` action with a human-readable summary covering:
 - Every field filled and the value used
 - Any fields skipped and why
