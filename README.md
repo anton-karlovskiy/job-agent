@@ -53,22 +53,74 @@ personal:
   last_name: Doe
   email: jane@example.com
   phone: "+1-555-555-5555"
-  location: Stockholm, Sweden
+  location: San Francisco, CA
+  linkedin: https://linkedin.com/in/janedoe
+  github: https://github.com/janedoe
+  twitter: https://x.com/janedoe
+  telegram: https://t.me/janedoe
 
 target:
-  roles: [Senior Software Developer]
-  work_authorization: "US Citizen"
+  roles:
+    - Senior Software Engineer
+    - Backend Engineer
+  seniority: Senior
+  industries:
+    - fintech
+    - developer tools
+  preferred_locations:
+    - San Francisco, CA
+    - Remote
+  open_to_relocation: false
+  notice_period: "2 weeks"
+  work_authorization:
+    citizenship: US Citizen
+    authorized: true
+    sponsorship_needed: false
 
 experience:
   years_total: 7
-  current_title: "Senior Software Developer"
+  current_title: Senior Software Engineer
+  current_company: Acme Corp
+  summary: >
+    Backend-focused engineer with 7 years building distributed systems in Python and Go.
+
+skills:
+  languages:
+    - Python
+    - Go
+    - TypeScript
+  frameworks:
+    - FastAPI
+    - Django
+    - React
+  tools:
+    - PostgreSQL
+    - Redis
+    - Kubernetes
+    - Docker
+
+education:
+  - degree: B.S. Computer Science
+    school: University of California, Berkeley
+    year: 2018
 
 compensation:
-  desired_salary_usd: 120000
+  desired_salary_usd: 180000
+  open_to_equity: true
 
 preferences:
-  cover_letter_tone: professional   # professional | casual | enthusiastic
+  cover_letter_tone: professional   # professional | casual
   writing_style: natural-human      # natural-human | formal
+
+answers:
+  # Pre-baked answers used verbatim for common screening questions.
+  why_this_company: >
+    I'm drawn to the company's focus on developer experience and its track record
+    of shipping pragmatic solutions to hard infrastructure problems.
+  greatest_strength: >
+    I break ambiguous problems into concrete pieces quickly.
+  greatest_weakness: >
+    I used to under-communicate blockers; I've since built a daily check-in habit.
 ```
 
 For fields not in your profile, the agent generates a best-effort answer autonomously. It only pauses to ask you for hard blockers it cannot bypass.
