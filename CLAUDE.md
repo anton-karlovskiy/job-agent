@@ -81,5 +81,3 @@ LOG_DB_PATH=./applications.db
 ```
 
 To switch provider/model, edit `_LLM_PROVIDER` / `_LLM_MODEL` at the top of `src/job_agent/main.py`.
-
-To install non-OpenAI provider packages: `uv sync --extra anthropic` / `--extra google` / `--extra all-providers`

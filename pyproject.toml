@@ -13,11 +13,6 @@ dependencies = [
     "sqlalchemy>=2.0",
 ]
 
-[project.optional-dependencies]
-anthropic = ["langchain-anthropic"]
-google = ["langchain-google-genai"]
-all-providers = ["langchain-anthropic", "langchain-google-genai"]
-
 [dependency-groups]
 dev = [
     "mypy>=1.0",
