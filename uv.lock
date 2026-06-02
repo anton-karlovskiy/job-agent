@@ -1144,7 +1144,7 @@ requires-dist = [
     { name = "pyyaml" },
     { name = "rich" },
     { name = "sqlalchemy", specifier = ">=2.0" },
-    { name = "typer", extras = ["all"] },
+    { name = "typer" },
 ]
 
 [package.metadata.requires-dev]
