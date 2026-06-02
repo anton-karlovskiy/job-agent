@@ -39,11 +39,11 @@ def build_task_prompt(applicant: Applicant, job_url: str, dry_run: bool) -> str:
     style_rule = _NATURAL_HUMAN_STYLE if writing_style == "natural-human" else _FORMAL_STYLE
 
     submission_step = (
-        "**11. DRY RUN — stop before submitting**\n"
+        "**12. DRY RUN — stop before submitting**\n"
         "Do NOT click submit. Report the full summary of what you would have submitted."
         if dry_run
         else (
-            "**11. Before submitting — call `confirm_submit`**\n"
+            "**12. Before submitting — call `confirm_submit`**\n"
             "Before clicking the final submit/apply/send button:\n"
             "- Compile a two-column table: field name | value filled.\n"
             "- Call `confirm_submit` with that table as the `summary` argument.\n"
@@ -51,6 +51,10 @@ def build_task_prompt(applicant: Applicant, job_url: str, dry_run: bool) -> str:
             "- If the user declines → call `done` with success=False and note the reason."
         )
     )
+
+    compensation: dict[str, object] = applicant.profile_yaml.get("compensation", {})
+    desired_salary: int = int(compensation.get("desired_salary_usd", 0))
+    desired_salary_formatted: str = f"{desired_salary:,}" if desired_salary else "negotiable"
 
     return f"""You are a job application assistant. Fill out and submit the job application at: {job_url}
 
@@ -109,7 +113,15 @@ Many forms split a phone number into two fields: a country-code dropdown and a l
 - If the field is required and no option matches → call `ask_human`.
 - If a button or field is unclickable, use `send_keys` with "Tab Tab Enter" or "ArrowDown Enter" to navigate around it.
 
-**10. When to call `ask_human` (hard blockers only)**
+**10. Compensation / Pay fields**
+Before filling any salary, pay, or compensation field:
+- Scan the job listing for the company's stated pay range (hourly or annual).
+- If the listing shows an **hourly range** (e.g. "$110–$115/hr"), enter the midpoint rounded to two decimal places (e.g. "112.50"). Do NOT convert the applicant's annual salary to an hourly figure.
+- If the listing shows an **annual salary range**, enter the midpoint formatted as "X USD/year".
+- If the listing shows **no pay range**, enter the applicant's desired salary formatted as "{desired_salary_formatted} USD/year" (comma-separated thousands, explicit currency and pay period).
+- Always include the currency (USD) and pay period (per year or per hour) in the value you type.
+
+**11. When to call `ask_human` (hard blockers only)**
 Call `ask_human` only when you are genuinely stuck:
 - CAPTCHA or bot-check
 - Unexpected login wall or MFA prompt
@@ -120,7 +132,7 @@ Describe exactly what you encountered and what the user must do to unblock.
 
 {submission_step}
 
-**12. Finish — call `done`**
+**13. Finish — call `done`**
 Call the `done` action with a human-readable summary covering:
 - Every field filled and the value used
 - Any fields skipped and why
