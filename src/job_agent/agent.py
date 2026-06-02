@@ -13,7 +13,7 @@ _PROVIDER_DEFAULTS: dict[str, str] = {
     "openai": "gpt-4o",
     "anthropic": "claude-sonnet-4-6",
     "google": "gemini-2.5-flash",
-    "groq": "llama-3.3-70b-versatile",
+    "groq": "meta-llama/llama-4-scout-17b-16e-instruct",
     "browseruse": "",
 }
 
