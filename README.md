@@ -21,6 +21,10 @@ Copy `applicant/profile.yaml.example` to `applicant/profile.yaml` and fill in yo
 
 To switch the LLM provider or model, edit `_LLM_PROVIDER` / `_LLM_MODEL` at the top of `src/job_agent/main.py`.
 
+> **Best accuracy:** browser-use's [own models](https://browser-use.com/posts/what-model-to-use) outperform generic frontier LLMs on web tasks.
+> - **`bu-ultra`** (cloud) — 78% accuracy; includes stealth browser, CAPTCHA solving, and optimized tool orchestration. Set `_LLM_PROVIDER = "browseruse"` and add `BROWSER_USE_API_KEY` to `.env`.
+> - **`ChatBrowserUse-2`** (open-source) — 63.3% accuracy; self-hostable, faster and cheaper per task than Claude/GPT/Gemini.
+
 ## Usage
 
 ```bash
