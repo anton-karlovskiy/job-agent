@@ -41,7 +41,7 @@ The data flow for a single `apply` run:
 main.py (typer CLI)
   → applicant.py        loads profile.yaml + resume (.md preferred, .pdf fallback)
   → prompt.py           builds the task string sent to browser-use Agent
-  → agent.py            instantiates ChatOpenAI + Browser + Agent, calls Agent.run()
+  → agent.py            instantiates LLM via make_llm(provider, model) + Browser + Agent, calls Agent.run()
       ↕ tools.py        custom browser-use actions (ask_human, confirm_submit)
   → logger.py           writes SQLAlchemy Application row to applications.db
 ```
@@ -70,11 +70,16 @@ main.py (typer CLI)
 
 ## Environment
 
-Copy `.env.example` to `.env` and set `OPENAI_API_KEY`. Key variables:
+Copy `.env.example` to `.env` and set the API key matching the provider configured in `main.py`. Key variables:
 
 ```
 OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-4o
+ANTHROPIC_API_KEY=sk-ant-...
+GOOGLE_API_KEY=...
 BROWSER_HEADLESS=false
 LOG_DB_PATH=./applications.db
 ```
+
+To switch provider/model, edit `_LLM_PROVIDER` / `_LLM_MODEL` at the top of `src/job_agent/main.py`.
+
+To install non-OpenAI provider packages: `uv sync --extra anthropic` / `--extra google` / `--extra all-providers`

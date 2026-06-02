@@ -32,7 +32,7 @@
 | Language | Python 3.11+ | Ecosystem fit |
 | Package manager | `uv` | Fast, modern, replaces pip |
 | Browser automation | `browser-use` | AI-native agent loop built on Playwright |
-| LLM | OpenAI (`gpt-4o` default, `o3` optional) | User has premium key; `browser-use` supports `ChatOpenAI` natively |
+| LLM | Provider-agnostic (`openai` default, also `anthropic`, `google`, `browseruse`) | `browser-use` re-exports LangChain chat models for all major providers |
 | CLI | `typer` + `rich` | Clean CLI with pretty output |
 | Config/profile | YAML + Markdown resume (PDF also supported) | Human-editable, AI-friendly; Markdown is preferred because it parses cleanly without extraction libraries |
 | Storage | SQLite via `sqlalchemy` (ORM) | Zero-setup application log; declarative ORM models with full type safety |
@@ -191,11 +191,12 @@ preferences:
 ## Environment variables (`.env`)
 
 ```
-OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-4o          # or o3
-BROWSER_HEADLESS=false        # set true for headless runs
+OPENAI_API_KEY=sk-...        # set the key matching the provider in main.py
+BROWSER_HEADLESS=false
 LOG_DB_PATH=./applications.db
 ```
+
+Provider and model are hardcoded in `src/job_agent/main.py` (`_LLM_PROVIDER`, `_LLM_MODEL`).
 
 ---
 
@@ -211,7 +212,6 @@ job-agent apply <url> [options]
 Options:
   --profile PATH     Path to profile.yaml (default: ./applicant/profile.yaml)
   --resume PATH      Path to resume file — .md (preferred) or .pdf (default: ./applicant/resume.md)
-  --model TEXT       OpenAI model override (default: from .env)
   --headless         Run browser in headless mode
   --dry-run          Fill the form but do not submit
   --yes              Skip the final submission confirmation prompt
@@ -303,7 +303,7 @@ async def ask_human(message: str) -> ActionResult:
 ### `agent.py`
 
 Responsibilities:
-- Instantiate `ChatOpenAI` (imported from `browser_use`) with the configured model
+- Accept an already-instantiated `llm` (created by `make_llm()` in `main.py`)
 - Instantiate `Browser` with headless/headful setting (`keep_alive=dry_run` so the window stays open on dry runs)
 - Instantiate `browser-use` `Agent` with task, LLM, browser, custom tools, `available_file_paths`, and `max_failures=3`
 - Run the agent and return the result
@@ -314,7 +314,7 @@ async def run_application(
     job_url: str,
     applicant: Applicant,
     available_file_paths: list[str],
-    model: str,
+    llm: Any,
     headless: bool,
     dry_run: bool,
     auto_confirm: bool,
@@ -491,7 +491,7 @@ After each run, `job-agent log` displays:
 - [ ] Project scaffold with `uv`, `pyproject.toml`, folder structure
 - [ ] `applicant.py` — `Applicant` dataclass, `load_applicant()`, YAML + PDF/MD resume loading
 - [ ] `tools.py` — `ask_human` tool (file uploads handled natively via `available_file_paths`)
-- [ ] `agent.py` — `run_application()` wiring `ChatOpenAI` + `Browser` + `Agent`; returns `AgentResult`
+- [ ] `agent.py` — `run_application()` wiring LLM + `Browser` + `Agent`; returns `AgentResult`
 - [ ] `prompt.py` — task prompt builder with writing-style injection
 - [ ] `main.py` — `job-agent apply` CLI command
 - [ ] Manual test against a real job application URL
