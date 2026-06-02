@@ -12,7 +12,8 @@ from job_agent.tools import make_tools
 _PROVIDER_DEFAULTS: dict[str, str] = {
     "openai": "gpt-4o",
     "anthropic": "claude-sonnet-4-6",
-    "google": "gemini-2.0-flash",
+    "google": "gemini-2.5-flash",
+    "groq": "llama-3.3-70b-versatile",
     "browseruse": "",
 }
 
@@ -23,7 +24,7 @@ def make_llm(provider: str, model: str | None) -> Any:
     """Instantiate a LangChain chat model for the given provider and model name.
 
     Args:
-        provider: One of 'openai', 'anthropic', 'google', 'browseruse'.
+        provider: One of 'openai', 'anthropic', 'google', 'groq', 'browseruse'.
         model: Model name; uses a sensible default for the provider when None.
 
     Returns:
@@ -39,6 +40,9 @@ def make_llm(provider: str, model: str | None) -> Any:
     if provider == "google":
         from browser_use import ChatGoogle
         return ChatGoogle(model=resolved)
+    if provider == "groq":
+        from browser_use import ChatGroq
+        return ChatGroq(model=resolved)
     if provider == "browseruse":
         from browser_use import ChatBrowserUse
         return ChatBrowserUse()

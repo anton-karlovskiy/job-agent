@@ -10,9 +10,9 @@ from rich.console import Console
 load_dotenv()
 
 # LLM configuration — edit here to switch provider or model.
-# Providers: openai | anthropic | google | browseruse
+# Providers: openai | anthropic | google | groq | browseruse
 # Model: None uses the provider default (gpt-4o / claude-sonnet-4-6 / gemini-2.0-flash)
-_LLM_PROVIDER = "openai"
+_LLM_PROVIDER = "browseruse"
 _LLM_MODEL: str | None = None
 
 app = typer.Typer(
